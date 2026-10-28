@@ -1,6 +1,6 @@
 # ASCII-only. Check static-ness of tooltable methods + action/data field shapes.
 $ErrorActionPreference = 'Stop'
-Add-Type -Path "C:\Users\wangk\.zcode\workspace\default\mod_stack\release\SurvivalLog.StackLimit999_v2.7.9\BepInEx\core\Mono.Cecil.dll"
+Add-Type -Path "E:\Game\Mod\survivallog-mods\suite\release\SurvivalLog.StackLimit999_v2.7.9\BepInEx\core\Mono.Cecil.dll"
 $asm = [Mono.Cecil.AssemblyDefinition]::ReadAssembly("E:\SteamLibrary\steamapps\common\Survival Log\BepInEx\interop\HotUpdate.dll")
 $mod = $asm.MainModule
 

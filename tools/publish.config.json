@@ -1,4 +1,4 @@
 ﻿{
   "baiduSyncDir": "",
-  "_note": "百度网盘不使用同步空间（需会员）。留空时 publish.ps1 把安装器+说明+6 zip 组装到 release\\baidu_upload\\，再通过网页版网盘上传（可由助手用浏览器自动化代为操作）。若未来配置了本地同步目录，把绝对路径填到 baiduSyncDir 即自动拷入。"
+  "_note": "百度网盘不使用同步空间（需会员）。留空时 publish.ps1 把安装器+说明+13 zip（Base+12 mod）组装到 release\\baidu_upload\\，再通过网页版网盘上传（可由助手用浏览器自动化代为操作）。若未来配置了本地同步目录，把绝对路径填到 baiduSyncDir 即自动拷入。"
 }

@@ -29,7 +29,7 @@ const MAIN_HTML = '/UI/MainUI/MainUI.html';
 const GAME_ROOT = 'E:/SteamLibrary/steamapps/common/Survival Log';
 const KB_TXT = GAME_ROOT + '/BepInEx/ModCenter_kb.txt';
 const QA_GUID = 'com.local.survivallog.quickaction';
-const SHOT_DIR = 'E:/Game/Mod/mod_stack/.superpowers/sdd/2026-10-24-modcenter';
+const SHOT_DIR = 'E:/Game/Mod/survivallog-mods/suite/.superpowers/sdd/2026-10-24-modcenter';
 
 const ROUNDS = 3;
 const CONNECT_BUDGET_MS = 180000;
@@ -97,7 +97,7 @@ function inMain(page, fn, arg) {
 function sendKeysReal(key) {
   return new Promise((resolve) => {
     execFile('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass',
-      '-File', 'E:/Game/Mod/mod_stack/tools/_mc_kb_type.ps1', '-Key', key],
+      '-File', 'E:/Game/Mod/survivallog-mods/suite/tools/_mc_kb_type.ps1', '-Key', key],
       { timeout: 20000 }, (err, stdout, stderr) => {
         resolve({ err: err ? String(err.message) : null, stdout: String(stdout || ''), stderr: String(stderr || '') });
       });

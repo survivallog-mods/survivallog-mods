@@ -19,7 +19,7 @@ const kbLines = () => { try { return FS.readFileSync(KB_TXT, 'utf8').split('\n')
 function sendKeysReal(key) {
   return new Promise((resolve) => {
     execFile('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass',
-      '-File', 'E:/Game/Mod/mod_stack/tools/_mc_kb_type.ps1', '-Key', key],
+      '-File', 'E:/Game/Mod/survivallog-mods/suite/tools/_mc_kb_type.ps1', '-Key', key],
       { timeout: 20000 }, (err, stdout) => resolve({ err: err ? String(err.message) : null, stdout: String(stdout || '') }));
   });
 }

@@ -336,7 +336,7 @@ function readRobotMult() {
   F.cfgDisabledFinal = readCfgDisabled();
   F.robotMultFinal = readRobotMult();
 
-  try { await page.screenshot({ path: 'E:/Game/Mod/mod_stack/.superpowers/sdd/2026-10-24-modcenter/task-6-shot-panel.png' }); } catch (e) {}
+  try { await page.screenshot({ path: 'E:/Game/Mod/survivallog-mods/suite/.superpowers/sdd/2026-10-24-modcenter/task-6-shot-panel.png' }); } catch (e) {}
 
   await browser.close();
 

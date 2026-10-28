@@ -1,6 +1,6 @@
 ﻿$ErrorActionPreference = 'Stop'
-$projRoot = 'E:\Game\Mod\mod_stack'
-# 版本号唯一来源：根目录 version.json（仅作者定义，脚本只读）
+$projRoot = 'E:\Game\Mod\survivallog-mods\suite'
+# 版本号唯一来源：suite 根 version.json 的 suite 字段（仅作者定义，脚本只读）
 $ver = (Get-Content (Join-Path $projRoot 'version.json') -Raw | ConvertFrom-Json).suite
 $setup = Join-Path $projRoot ('release\生存日志MOD安装器_v' + $ver + '.exe')
 $test   = Join-Path $projRoot 'release\_setup_test'

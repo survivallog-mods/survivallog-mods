@@ -1,8 +1,8 @@
 $ErrorActionPreference = 'Stop'
 $ver    = '2.9.29'
 $game   = 'E:\SteamLibrary\steamapps\common\Survival Log'
-$proj   = 'E:\Game\Mod\mod_stack\SurvivalLog.StackLimit999'
-$relRoot= 'E:\Game\Mod\mod_stack\release'
+$proj   = 'E:\Game\Mod\survivallog-mods\suite\SurvivalLog.StackLimit999'
+$relRoot= 'E:\Game\Mod\survivallog-mods\suite\release'
 $rel    = Join-Path $relRoot ('SurvivalLog.StackLimit999_v' + $ver)
 
 if (Test-Path $rel) { Remove-Item $rel -Recurse -Force }

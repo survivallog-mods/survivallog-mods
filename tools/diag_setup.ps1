@@ -1,6 +1,6 @@
 ﻿$ErrorActionPreference = 'Continue'
-$setup = 'E:\Game\Mod\mod_stack\release\生存日志MOD安装器_v1.3.1.exe'
-$test   = 'E:\Game\Mod\mod_stack\release\_setup_test'
+$setup = 'E:\Game\Mod\survivallog-mods\suite\release\生存日志MOD安装器_v1.3.1.exe'
+$test   = 'E:\Game\Mod\survivallog-mods\suite\release\_setup_test'
 $game   = Join-Path $test 'game'
 
 if (Test-Path $test) { Remove-Item $test -Recurse -Force }

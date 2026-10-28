@@ -4,7 +4,7 @@ Add-Type -Path $cecil
 $rp = New-Object Mono.Cecil.ReaderParameters
 $rp.ReadSymbols = $false
 
-$outDir = 'E:\Game\Mod\mod_stack\tools\newmods_res'
+$outDir = 'E:\Game\Mod\survivallog-mods\suite\tools\newmods_res'
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 
 $targets = @(

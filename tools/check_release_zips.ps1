@@ -1,6 +1,6 @@
 ﻿$ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
-Get-ChildItem 'E:\Game\Mod\mod_stack\release\*.zip' | ForEach-Object {
+Get-ChildItem 'E:\Game\Mod\survivallog-mods\suite\release\*.zip' | ForEach-Object {
     $z = [IO.Compression.ZipFile]::OpenRead($_.FullName)
     $plugins = $z.Entries |
         Where-Object { $_.FullName.Replace('\', '/') -match 'plugins/' } |

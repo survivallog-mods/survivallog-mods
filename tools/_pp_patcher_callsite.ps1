@@ -1,5 +1,5 @@
 $ErrorActionPreference = 'Stop'
-Add-Type -Path 'E:\Game\Mod\mod_stack\tools\Cecil\Mono.Cecil.dll'
+Add-Type -Path 'E:\Game\Mod\survivallog-mods\suite\tools\Cecil\Mono.Cecil.dll'
 $core = 'E:\SteamLibrary\steamapps\common\Survival Log\BepInEx\core'
 $out = New-Object System.Collections.Generic.List[string]
 
@@ -46,5 +46,5 @@ foreach ($ty in $asm3.MainModule.Types) {
   }
 }
 
-$out | Out-File -FilePath 'E:\Game\Mod\mod_stack\tools\_pp_patcher_callsite.out.txt' -Encoding UTF8
+$out | Out-File -FilePath 'E:\Game\Mod\survivallog-mods\suite\tools\_pp_patcher_callsite.out.txt' -Encoding UTF8
 Write-Host ('LINES: ' + $out.Count)

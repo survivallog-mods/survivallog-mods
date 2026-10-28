@@ -17,7 +17,7 @@ const MAIN_HTML = '/UI/MainUI/MainUI.html';
 const QA_CFG = 'E:/SteamLibrary/steamapps/common/Survival Log/BepInEx/config/com.local.survivallog.quickaction.cfg';
 const QA_GUID = 'com.local.survivallog.quickaction';
 const RS_GUID = 'com.local.survivallog.robotspeed';
-const SHOT = 'E:/Game/Mod/mod_stack/.superpowers/sdd/2026-10-24-modcenter/bugfix-round2-shot-menu.png';
+const SHOT = 'E:/Game/Mod/survivallog-mods/suite/.superpowers/sdd/2026-10-24-modcenter/bugfix-round2-shot-menu.png';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const t0 = Date.now();
@@ -272,7 +272,7 @@ function inMain(page, fn, ...args) {
   let pass = 0, fail = 0;
   for (const [k, v] of Object.entries(V)) { if (v) pass++; else { fail++; log('FAIL ' + k); } }
   console.log('\n==== MENU PHASE: ' + pass + ' PASS / ' + fail + ' FAIL ====');
-  FS.writeFileSync('E:/Game/Mod/mod_stack/.superpowers/sdd/2026-10-24-modcenter/bugfix-round2-menu-facts.json', JSON.stringify({ V, R }, null, 2));
+  FS.writeFileSync('E:/Game/Mod/survivallog-mods/suite/.superpowers/sdd/2026-10-24-modcenter/bugfix-round2-menu-facts.json', JSON.stringify({ V, R }, null, 2));
   await browser.close();
   process.exit(fail ? 1 : 0);
 })().catch((e) => { console.log('FATAL ' + e.message); process.exit(2); });

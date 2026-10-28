@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 # Reproduces the player path: old-suite install (no unity-libs in package) -> BepInEx downloaded a corrupt zip
 # -> old uninstall leaves it -> NEW installer -> must overwrite with the good copy -> NEW uninstall removes it.
 # ASCII-only on purpose (PS 5.1 reads BOM-less UTF-8 scripts as ANSI; Chinese literals get mojibake - bitten once).
-$proj = 'E:\Game\Mod\mod_stack'
+$proj = 'E:\Game\Mod\survivallog-mods\suite'
 $rel  = Join-Path $proj 'release'
 $ver  = (Get-Content (Join-Path $proj 'version.json') -Raw | ConvertFrom-Json).suite
 $iscc = Join-Path $env:LOCALAPPDATA 'Programs\Inno Setup 7\ISCC.exe'

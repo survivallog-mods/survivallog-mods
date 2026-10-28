@@ -13,7 +13,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 function esc() {
   return new Promise((resolve) => {
     execFile('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass',
-      '-File', 'E:/Game/Mod/mod_stack/tools/_mc_sendkey.ps1'], { timeout: 20000 }, () => resolve(true));
+      '-File', 'E:/Game/Mod/survivallog-mods/suite/tools/_mc_sendkey.ps1'], { timeout: 20000 }, () => resolve(true));
   });
 }
 const tail = '/UI/OutSetting/OutSetting.html';

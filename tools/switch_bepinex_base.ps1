@@ -17,7 +17,7 @@
 
 param(
     [string]$GameDir = "E:\SteamLibrary\steamapps\common\Survival Log",
-    [string]$BaseDir = "E:\Game\Mod\mod_stack\release\SurvivalLog.Base_v1.3.8_be788test",
+    [string]$BaseDir = "E:\Game\Mod\survivallog-mods\suite\release\SurvivalLog.Base_v1.3.8_be788test",
     [Parameter(Mandatory = $true)][ValidateSet("switch", "restore")][string]$Action,
     [switch]$FreshInterop,
     [switch]$Launch

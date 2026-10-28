@@ -1,5 +1,5 @@
 $ErrorActionPreference = 'Stop'
-Add-Type -Path 'C:\Users\wangk\.zcode\workspace\default\mod_stack\tools\Cecil\Mono.Cecil.dll'
+Add-Type -Path 'E:\Game\Mod\survivallog-mods\suite\tools\Cecil\Mono.Cecil.dll'
 $asm = [Mono.Cecil.AssemblyDefinition]::ReadAssembly('E:\SteamLibrary\steamapps\common\Survival Log\BepInEx\interop\HotUpdate.dll')
 foreach ($tn in @('GameCore.HotUpdate.ReduxUI.Ac_ToolTable_Open','GameCore.HotUpdate.ReduxUI.Ac_ToolTable_RecipeClick')) {
     $t = $asm.MainModule.GetType($tn)

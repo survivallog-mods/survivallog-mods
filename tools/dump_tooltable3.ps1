@@ -1,6 +1,6 @@
 # ASCII-only. Dump Reducer_Web_ToolTable method list + key method IL + event name strings.
 $ErrorActionPreference = 'Stop'
-Add-Type -Path "C:\Users\wangk\.zcode\workspace\default\mod_stack\release\SurvivalLog.StackLimit999_v2.7.9\BepInEx\core\Mono.Cecil.dll"
+Add-Type -Path "E:\Game\Mod\survivallog-mods\suite\release\SurvivalLog.StackLimit999_v2.7.9\BepInEx\core\Mono.Cecil.dll"
 
 $dll = "E:\SteamLibrary\steamapps\common\Survival Log\BepInEx\interop\HotUpdate.dll"
 $asm = [Mono.Cecil.AssemblyDefinition]::ReadAssembly($dll)

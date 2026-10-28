@@ -13,8 +13,8 @@ const { execFile } = require('child_process');
 const CDP = 'http://localhost:9222';
 const OUT_HTML = '/UI/OutSetting/OutSetting.html';
 const RS_GUID = 'com.local.survivallog.robotspeed';
-const SHOT = 'E:/Game/Mod/mod_stack/.superpowers/sdd/2026-10-24-modcenter/bugfix-round2-shot-ingame.png';
-const SENDKEY = 'E:/Game/Mod/mod_stack/tools/_mc_sendkey.ps1';
+const SHOT = 'E:/Game/Mod/survivallog-mods/suite/.superpowers/sdd/2026-10-24-modcenter/bugfix-round2-shot-ingame.png';
+const SENDKEY = 'E:/Game/Mod/survivallog-mods/suite/tools/_mc_sendkey.ps1';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const t0 = Date.now();
@@ -211,7 +211,7 @@ function sendEsc() {
   };
   console.log('\n==== IN-GAME PHASE ====');
   console.log(JSON.stringify({ rounds, V, shot }, null, 2));
-  FS.writeFileSync('E:/Game/Mod/mod_stack/.superpowers/sdd/2026-10-24-modcenter/bugfix-round2-ingame-facts.json',
+  FS.writeFileSync('E:/Game/Mod/survivallog-mods/suite/.superpowers/sdd/2026-10-24-modcenter/bugfix-round2-ingame-facts.json',
     JSON.stringify({ rounds, V, shot }, null, 2));
   const fail = !(V.threeRounds && V.allWithin300 && V.inGamePanelOpened);
   await browser.close();

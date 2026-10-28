@@ -68,7 +68,7 @@ const CB_CFG = GAME_ROOT + '/BepInEx/config/com.local.survivallog.cabinetsize.cf
 const KB_TXT = GAME_ROOT + '/BepInEx/ModCenter_kb.txt'; // FocusTick self-evidence (T8)
 const PP_GUID = 'com.local.survivallog.planpick';
 const PP_CFG = GAME_ROOT + '/BepInEx/config/com.local.survivallog.planpick.cfg';
-const SHOT_DIR = 'E:/Game/Mod/mod_stack/.superpowers/sdd/2026-10-24-modcenter';
+const SHOT_DIR = 'E:/Game/Mod/survivallog-mods/suite/.superpowers/sdd/2026-10-24-modcenter';
 
 const MODE = (process.argv[2] || 'menu').toLowerCase();
 const CONNECT_BUDGET_MS = 180000;
@@ -2609,7 +2609,7 @@ async function outsettingMode() {
       const typed = await new Promise((resolve) => {
         const { execFile } = require('child_process');
         execFile('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass',
-          '-File', 'E:/Game/Mod/mod_stack/tools/_mc_phys_type.ps1',
+          '-File', 'E:/Game/Mod/survivallog-mods/suite/tools/_mc_phys_type.ps1',
           '-CssX', String(Math.round(geo.cssX)), '-CssY', String(Math.round(geo.cssY)),
           '-Key', '8012', '-InnerW', String(Math.round(geo.innerW))],
           { timeout: 30000 }, (err, stdout) => resolve({ err: err ? String(err.message) : null, stdout: String(stdout || '') }));
@@ -2734,7 +2734,7 @@ async function outsettingMode() {
     const esc = await new Promise((resolve) => {
       const { execFile } = require('child_process');
       execFile('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass',
-        '-File', 'E:/Game/Mod/mod_stack/tools/_mc_sendkey.ps1'],
+        '-File', 'E:/Game/Mod/survivallog-mods/suite/tools/_mc_sendkey.ps1'],
         { timeout: 20000 }, (err, stdout) => resolve({ err: err ? String(err.message) : null, stdout: String(stdout || '') }));
     });
     hdg.esc = esc;
@@ -3637,7 +3637,7 @@ async function inGameMode() {
   const sendEsc = () => new Promise((resolve) => {
     const { execFile } = require('child_process');
     execFile('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass',
-      '-File', 'E:/Game/Mod/mod_stack/tools/_mc_sendkey.ps1'],
+      '-File', 'E:/Game/Mod/survivallog-mods/suite/tools/_mc_sendkey.ps1'],
       { timeout: 20000 }, (err, stdout) => resolve({ err: err ? String(err.message) : null, stdout: String(stdout || '') }));
   });
   // open OutSetting panel, toggle a suite mod, wait push-back, close via X, ESC back

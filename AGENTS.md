@@ -19,13 +19,14 @@
 12. **实证优先**：不猜先查（反汇编/读源码/运行时探针），方案确认后再动手，最小侵入。
 13. **外部工具装卸可能拆注入链**（2026-10-24 xmod 卸载实锤拆了 winhttp/dotnet/BepInEx core，见 docs/03 环境事故节）：任何 xmod/修改器/loader 安装或卸载后、以及"mod 全部失效"时，先验三件套——根目录 `winhttp.dll`+`doorstop_config.ini`、`dotnet\` 有货、`BepInEx\core` 有 dll；被拆即重跑套件安装器（勿 /SILENT）。
 14. **N网通道确认门**：向 Nexus Mods 推送发版前必须经作者显式触发/确认（publish.ps1 出完 GitHub Release 后不得自动推 N网）；API key 本地单源 `tools/secrets/`（gitignore 已锚定）绝不入库。详见 `docs/08`。
-15. **组织镜像仓红线**：GitHub 组织 `survivallog-mods` 下的 12 个 mod 仓是 `tools\sync_repos.ps1` 从 git HEAD 打的**发布镜像**（开发只在单仓，镜像仓永不手改）；快照源是 HEAD 而非工作树，作者 WIP 绝不入镜像。探针三件（ActionProbe/ConfigDumpProbe/ViewportProbe）、StackLimit999、CabinetExpand **绝不建仓**。单 mod 发版走 `tools\release_mod.ps1 -Mod <名>`（发版源码必须已提交，脚本有干净树闸门）；N网推送永远另走确认门（规则 14）。
+15. **多仓红线（2026-10-28 拆分迁移后）**：GitHub 组织 `survivallog-mods` 下 12 个 mod 仓是**权威源码仓**（本地 clone 在父夹 `E:\Game\Mod\survivallog-mods\<Mod>`，各仓自带 `release.ps1` 单发流水线）；本 suite 仓只管 安装器/Base/工具链/ModShared/探针。`tools\push_modshared.ps1` 把 suite\ModShared 镜像推送各仓（唯一允许的 suite→mod 仓下行同步）。探针三件（ActionProbe/ConfigDumpProbe/ViewportProbe）、StackLimit999、CabinetExpand **绝不建仓**。单 mod 发版在各仓仓内跑 `release.ps1`（版本号=该仓 csproj `<Version>`，作者定义）；N网推送永远另走确认门（规则 14）。
 
 ## 二、环境与路径（本机开发环境）
 
 | 项 | 路径 |
 |---|---|
-| 仓库 | `E:\Game\Mod\mod_stack` |
+| 中枢仓（suite） | `E:\Game\Mod\survivallog-mods\suite`（origin=survivallog-mods/survivallog-mods） |
+| 12 mod 仓 clone | `E:\Game\Mod\survivallog-mods\<Mod>`（父夹下与 suite 平级；`gamekb`、`sdk` 为父夹级 junction 共享件） |
 | 游戏本体 | `E:\SteamLibrary\steamapps\common\Survival Log`（AppID 4164790，Unity 6000.2.7f2，IL2CPP，Steam 注册表 HKCU:\SOFTWARE\Valve\Steam → libraryfolders.vdf 定位） |
 | 存档 | `C:\Users\<user>\AppData\LocalLow\LLS\SLGame\Saves\` |
 | 注入链 | 游戏根目录 `winhttp.dll`(Doorstop) + `dotnet\` + `BepInEx\`（约 138MB）；Steam 重装/校验不会清除 |
@@ -35,8 +36,8 @@
 ## 三、常用命令速查
 
 ```bash
-# 构建（判退出码，见硬规则 8）
-"E:/Game/Mod/mod_stack/sdk/dotnet/dotnet.exe" build SurvivalLog.<Mod名> -c Release > build.log 2>&1; echo $?
+# 构建（判退出码，见硬规则 8；sdk 为父夹级 junction）
+"E:/Game/Mod/survivallog-mods/sdk/dotnet/dotnet.exe" build "E:/Game/Mod/survivallog-mods/<Mod>/SurvivalLog.<Mod名>" -c Release > build.log 2>&1; echo $?
 
 # 游戏更新后一键同步（快照+diff+兼容核对+[-AutoProbe]启动采表）
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/gamekb/gamekb_sync.ps1 [-AutoProbe]
@@ -52,14 +53,14 @@ node tools/gamekb/sigscan.js "E:/SteamLibrary/steamapps/common/Survival Log/Game
 
 # 表数值查询：直接读 gamekb/<版本>/tables/Config_<表名>.json（125 表；5 张非 int 键表仅行数）
 
-# 发版（作者定号后）
+# 套件发版（作者在 suite version.json 定套件号后）
 powershell -File tools/publish.ps1
 
-# 单 mod 发版（GitHub 组织通道；版本号=version.json 的 mods 字段，作者定义）
-powershell -File tools/release_mod.ps1 -Mod QuickAction
+# 单 mod 发版（各仓仓内；版本号=该仓 csproj <Version>，作者定义）
+powershell -File <父夹>\<Mod>\release.ps1
 
-# 组织镜像仓快照同步（幂等；-Create 仅首次建仓用）
-powershell -File tools/sync_repos.ps1 [-Mod <名>] [-Create]
+# ModShared 下行同步（权威=suite\ModShared → 12 仓；幂等）
+powershell -File tools/push_modshared.ps1
 ```
 
 ## 四、两条核心工作流
@@ -68,7 +69,7 @@ powershell -File tools/sync_repos.ps1 [-Mod <名>] [-Create]
 `gamekb_sync.ps1` → 过目 `diff_from_*.md`（类型增删/变更 + modcompat 结果）→ modcompat 全绿 → 实机启动一次看各 mod 自证"生效" → 有红灯才改代码 → 走发版。
 
 **发版**（docs/05）：
-作者在 version.json 定号 → CHANGELOG 补该版小节 → `publish.ps1`（校验→构建→打包→安装器→回归→打 tag→GitHub Release 仅说明）。
+作者在 suite version.json 定套件号（各 mod 版本以各仓 csproj 为权威）→ CHANGELOG 补该版小节 → `publish.ps1`（拉取 12 仓→各仓 `release.ps1 -PackageOnly`→Base→安装器→回归→网盘组装→中枢仓 tag→GitHub Release 仅说明）。
 N网通道在此之后另走 docs/08 确认门：**必须作者显式触发/确认才推送**。
 
 ## 五、文档地图

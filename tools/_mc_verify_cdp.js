@@ -30,7 +30,7 @@ const PANEL_TITLE = 'MOD \u7ba1\u7406\u4e2d\u5fc3'; // "MOD 管理中心"
 const CONNECT_BUDGET_MS = 180000;
 const MENU_WAIT_MS = 150000;
 const POLL_MS = 1500;
-const SHOT_DIR = 'E:/Game/Mod/mod_stack/.superpowers/sdd/2026-10-24-modcenter';
+const SHOT_DIR = 'E:/Game/Mod/survivallog-mods/suite/.superpowers/sdd/2026-10-24-modcenter';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

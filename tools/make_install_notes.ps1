@@ -1,7 +1,8 @@
 ﻿$ErrorActionPreference = 'Stop'
-$projRoot = 'E:\Game\Mod\mod_stack'
-# 版本号唯一来源：根目录 version.json（仅作者定义，脚本只读）
+$projRoot = 'E:\Game\Mod\survivallog-mods\suite'
+# 版本号唯一来源：suite 根 version.json 的 suite 字段（仅作者定义，脚本只读）
 $ver = (Get-Content (Join-Path $projRoot 'version.json') -Raw | ConvertFrom-Json).suite
+if (-not $ver) { throw 'version.json 缺少 suite 字段' }
 
 $tpl = [System.IO.File]::ReadAllText((Join-Path $projRoot 'tools\install_notes.tpl.txt'))
 if ($tpl -notmatch '\{V\}') { throw '模板里没有 {V} 占位符，检查 tools\install_notes.tpl.txt' }

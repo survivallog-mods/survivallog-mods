@@ -1,5 +1,5 @@
 $ErrorActionPreference = 'Stop'
-$f = 'C:\Users\wangk\.zcode\workspace\default\mod_stack\SurvivalLog.StackLimit999\StackPatches.cs'
+$f = 'E:\Game\Mod\survivallog-mods\suite\SurvivalLog.StackLimit999\StackPatches.cs'
 $text = [System.IO.File]::ReadAllText($f, [System.Text.Encoding]::UTF8)
 
 # 1) Remove RECIPE_CLICK capture block (comment line above + the if block)

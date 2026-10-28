@@ -1,7 +1,7 @@
 # ASCII-only. Dump IL of ItemManager.OnMoveItem / TryMergeIntoOwner / OnQuickMoveItem
 # and find all call sites of OnMoveItem to determine argument order.
 $ErrorActionPreference = 'Stop'
-Add-Type -Path "C:\Users\wangk\.zcode\workspace\default\mod_stack\release\SurvivalLog.StackLimit999_v2.7.9\BepInEx\core\Mono.Cecil.dll"
+Add-Type -Path "E:\Game\Mod\survivallog-mods\suite\release\SurvivalLog.StackLimit999_v2.7.9\BepInEx\core\Mono.Cecil.dll"
 
 $dll = "E:\SteamLibrary\steamapps\common\Survival Log\BepInEx\interop\HotUpdate.dll"
 $asm = [Mono.Cecil.AssemblyDefinition]::ReadAssembly($dll)

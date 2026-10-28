@@ -11,7 +11,7 @@ const CMD = process.argv[2] || 'frames';
 function esc() {
   return new Promise((resolve) => {
     execFile('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass',
-      '-File', 'E:/Game/Mod/mod_stack/tools/_mc_sendkey.ps1'], { timeout: 20000 }, () => resolve(true));
+      '-File', 'E:/Game/Mod/survivallog-mods/suite/tools/_mc_sendkey.ps1'], { timeout: 20000 }, () => resolve(true));
   });
 }
 (async () => {
