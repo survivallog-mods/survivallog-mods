@@ -84,7 +84,7 @@ gamekb/
 ## 4. git 与版权红线
 
 - **`gamekb/` 整目录 .gitignore**（实现时在 .gitignore 加一节）。理由：dump/表数值/游戏二进制/
-  WebUI 资源均为游戏本体衍生物，仓库公开（GitHub wangk123/survivallog-mods），公开即侵权风险，
+  WebUI 资源均为游戏本体衍生物，仓库公开（GitHub 组织 survivallog-mods：中枢仓与 12 mod 仓），公开即侵权风险，
   与 N网 mod 转载红线（[03-教训与红线.md](03-教训与红线.md)）同理。
 - **公开内容仅限**：`tools/gamekb/` 工具源码、`moddeps.json`（只有符号名清单，属 mod 开发接口
   描述）、本文档。diff 报告含游戏符号明细，**留在本地 gamekb 内不入库**。

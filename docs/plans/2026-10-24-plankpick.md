@@ -116,7 +116,7 @@ internal sealed class PlanTicker : MonoBehaviour
 
 - [ ] **Step 3: 建 page.js 占位**——内容一行注释 `/* Task 3 填充 */`。
 
-- [ ] **Step 4: 构建**——`"E:/Game/Mod/mod_stack/sdk/dotnet/dotnet.exe" build SurvivalLog.PlanPick -c Release > build.log 2>&1; echo $?`，期望退出码 0。
+- [ ] **Step 4: 构建**——`"E:/Game/Mod/survivallog-mods/sdk/dotnet/dotnet.exe" build SurvivalLog.PlanPick -c Release > build.log 2>&1; echo $?`，期望退出码 0。
 
 - [ ] **Step 5: Commit**
 
