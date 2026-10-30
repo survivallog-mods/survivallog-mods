@@ -13,7 +13,7 @@
 //        layout + 9-page reconciliation (cabinet page = CabinetSize v5 since T20:
 //        dedicated 13-pack group first / general tiers second / personalization
 //        bagOvr DOM block, all numeric boxes type=text numboxes), snapshot-vs-disk
-//        cfg consistency for all 10 suite mods, PlanPick
+//        cfg consistency for all 11 suite mods, PlanPick
 //        Cost reflection range, select-shape via synthetic snapshot (UiFit gone in
 //        v3), no-range numeric number-box-only (Fix R1), t15/t16 slices (SKIP
 //        without throwaway targets), tp group (SKIP on machines without
@@ -79,6 +79,7 @@ const Z = {
   bp: '\u80cc\u5305\u6269\u5bb9', cb: '\u67dc\u5b50\u5bb9\u91cf', fc: '\u4fdd\u9c9c\u589e\u5f3a',
   qa: '\u52a8\u4f5c\u52a0\u901f', ce: '\u66f4\u597d\u7684\u50a8\u7269\u67dc', ru: '\u89d2\u8272\u89e3\u9501',
   rs: '\u673a\u5668\u4eba\u63d0\u901f', pp: '\u81ea\u9009\u751f\u5b58\u89c4\u5212', pd: '\u707e\u524d\u52a0\u901f',
+  cbB: '\u67dc\u5b50\u8d1f\u91cd\u89e3\u653e', gBurden: '\u8d1f\u91cd\u540d\u5355\uff08\u6539\u540e\u91cd\u8fdb\u5b58\u6863\u751f\u6548\uff09',
   gBpExp: '\u6269\u5bb9\u6570\u503c\uff080=\u6062\u590d\u5b98\u65b9\u539f\u503c\uff09', gBpCap: '\u9632\u5446\u4e0a\u9650\uff080=\u4e0d\u5c01\u9876\uff09', gUiFit: '\u89c6\u53e3\u81ea\u9002\u5e94', gChill: '\u4fdd\u9c9c',
   gMs: '\u5206\u7c7b\u8017\u65f6\uff08\u6beb\u79d2\uff0c0=\u5b98\u65b9\u539f\u503c\uff09',
   gVine: '\u85e4\u8513\u4e0e\u82b1\u79cd\u5b50', gPlan: '\u914d\u65b9\u4e0e\u89c4\u5212', // aedc790: 藤蔓角色 -> 藤蔓与花种子
@@ -91,7 +92,7 @@ const Z = {
   flower: '\u89e3\u9501\u85e4\u8513\u4e13\u5c5e\u82b1\u79cd\u5b50',
   burden: '\u8d1f\u91cd\u500d\u7387',
   w15h20: '\u5bbd1.5\u00d7\u9ad82.0',
-  afterLoad: '\u8bfb\u6863\u540e', toggleOnly: '\u4ec5\u652f\u6301\u542f\u7528',
+  afterLoad: '\u8bfb\u6863\u540e', toggleOnly: '\u53ea\u6709\u542f\u7528',
   fool: '\u9632\u5446', ovrNew: '\u65b0\u589e\u8986\u76d6',
   cont: '\u7ee7\u7eed\u6e38\u620f', newg: '\u65b0\u6e38\u620f',
 };
@@ -330,7 +331,7 @@ async function menuMode() {
     V.closeBtn = layout.closeBtn;
     V.footFourBadges = layout.footBadges === 4;
     V.toastEl = layout.toastEl;
-    V.sideTenRows = layout.sideRows === 11 + layout.tpCount; // 10 suite (EndlessGuard joined, 3122838) + self lock + N tp（T14 自适应）
+    V.sideTenRows = layout.sideRows === 12 + layout.tpCount; // 11 suite (EndlessGuard 3122838 + CabinetBurden 终审必修7) + self lock + N tp（T14 自适应）
     V.selfLock = layout.lockRow && layout.lockSw;
     V.tpEmptyHint = layout.tpCount === 0 ? !!layout.tpHint : !layout.tpHint; // 空数组→占位；非空→无占位
     V.threeCats = layout.cats.length === 3
@@ -354,6 +355,7 @@ async function menuMode() {
   const EXPECT = [
     { name: Z.bp, groups: [{ t: Z.gBpExp, items: 3 }, { t: Z.gBpCap, items: 2 }] },
     { name: Z.cb, groups: [{ t: Z.gCab13, items: 26 }, { t: Z.gCabGen, items: 10 }], special: 'cabinetv5' },
+    { name: Z.cbB, groups: [{ t: Z.gBurden, items: 4 }] },
     { name: Z.fc, groups: [{ t: Z.gChill, items: 2 }], special: 'fridge' },
     { name: Z.qa, groups: [{ t: Z.gMs, items: 5 }], special: 'ovr' },
     { name: Z.ce, groups: [], special: 'toggleOnly' },
@@ -544,7 +546,7 @@ async function menuMode() {
         try {
           const d = fs[i].contentDocument;
           if (d && d.location.pathname.indexOf(tail) !== -1)
-            return (d.querySelector('#__mc_cfg .__mc-mod-desc') || { textContent: '' }).textContent.indexOf('\u9632\u5446') !== -1;
+            return (d.querySelector('#__mc_cfg .__mc-mod-desc') || { textContent: '' }).textContent.indexOf('\u4e0d\u53ef\u505c\u7528') !== -1; // v3 desc
         } catch (e) {}
       }
       return false;
@@ -882,7 +884,7 @@ async function menuMode() {
       sent: firstOf(await sentSince(mk2), 'MC_TOGGLE_MOD') };
     V.tpToggleSnapshotBack = !!(tog && tog.enabled === false && tog.seq > seq0);
     V.tpToggleRowOffBanner = offRow === true && !!(offPage && offPage.stopBannerShown)
-      && !!bannerText && bannerText.indexOf('\u4e0b\u6b21\u542f\u52a8\u540e') !== -1; // restart-level wording
+      && !!bannerText && bannerText.indexOf('\u4e0b\u6b21\u542f\u52a8') !== -1; // v3: 下次启动不再加载
     V.tpToggleMarkerPersisted = !!(markerLine && markerLine.indexOf('true') !== -1);
     await tpClickToggle(tgt.guid); // restore enabled
     await sleep(2500);
@@ -2102,7 +2104,7 @@ async function menuMode() {
     }, MAIN_HTML);
     F.t16.absentRow = absBanner;
     V.t16AbsentRow = !!(absBanner && absBanner.rowOff === true && absBanner.banner
-      && absBanner.banner.indexOf('dll \u5df2\u7981\u7528') !== -1
+      && absBanner.banner.indexOf('\u5df2\u505c\u7528') !== -1
       && absBanner.banner.indexOf('\u5f53\u524d\u672a\u52a0\u8f7d') !== -1);
 
     // MC_TOAST (C# residue notice path): __mcEvent -> toastRaw visible
@@ -2238,7 +2240,7 @@ async function menuMode() {
     ['0  head title/sub(ver)/close', V.headTitle && V.headSubVer && V.closeBtn],
     ['0  foot 4-badge legend', V.footFourBadges],
     ['0  toast element present', V.toastEl],
-    ['0  side: 10 suite + self lock rows (+N tp)', V.sideTenRows && V.selfLock],
+    ['0  side: 11 suite + self lock rows (+N tp)', V.sideTenRows && V.selfLock],
     ['0  side: tp empty hint consistent with tp count', V.tpEmptyHint],
     ['0  side: 3 category headers', V.threeCats],
     ['0  default page = backpack 2 items 2 ranges', V.defaultPageBackpack],
@@ -2290,15 +2292,15 @@ async function menuMode() {
     ...(t0f
       ? [['16 t0 restart: 重启级 wording + [DisabledTp] marker (no soft)', V.t16RestartSemantics]]
       : [['16 t0 restart semantics', null]]),
-    ['16 absent row: off row + dll 已禁用/当前未加载 banner', V.t16AbsentRow],
+    ['16 absent row: off row + v3 banner', V.t16AbsentRow],
     ['16 MC_TOAST event -> toastRaw shown', V.t16McToast],
     ['16 synthetic snapshot cleaned up by fresh render', V.t16SyntheticCleanedUp],
     ...EXPECT.map((e) => ['1  page ' + e.name, V['page:' + e.name]]),
     ['D  PlanPick Cost min=100/max=300 reflected (snapshot+DOM)', V.planpickReflectedRange
       && (F.pages && F.pages[Z.pp] && F.pages[Z.pp].firstRange ? F.pages[Z.pp].firstRange.min === '100' && F.pages[Z.pp].firstRange.max === '300' : false)],
     ['1  self page fool-proof desc', V.selfPageFoolProof],
-    // T17: snapshot-vs-disk cfg consistency (spec sec.10, all 9 suite mods)
-    ['17 suite snapshot v == cfg Bind on disk (9 mods, all items)', V.suiteSnapshotVsDisk],
+    // T17: snapshot-vs-disk cfg consistency (spec sec.10, all 11 suite mods)
+    ['17 suite snapshot v == cfg Bind on disk (11 mods, all items)', V.suiteSnapshotVsDisk],
     ['17 suite Meta items all resolve on disk (Bind face complete)', V.suiteDiskCoverage],
     ['19 cabinetsize toggle: accepted + cfg General.Enabled written both ways', V.cbToggleAcceptedHotGate],
     ['17 cabinet tier write: shape + now receipt + disk + restore', V.cabTierWriteOk],
