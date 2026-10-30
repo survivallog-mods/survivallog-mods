@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>ModCenter v2 原型（融合式定稿）</title>
+<style>body{margin:0;background:#0b0d13;}</style>
+</head>
+<body>
+<div id="mc2proto">
+<style>
+#mc2proto{font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif;color:#e8e6e0;}
+#mc2proto *{box-sizing:border-box;margin:0;padding:0;}
+#mc2proto .mc-stage{display:flex;justify-content:center;padding:10px 0 4px;}
+#mc2proto .mc-panel{width:min(1150px,100%);height:716px;background:#171a23;border:1px solid #2a2f3d;border-radius:14px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 18px 70px rgba(0,0,0,.75);position:relative;user-select:none;}
+#mc2proto .mc-head{display:flex;align-items:center;gap:12px;padding:0 18px;height:52px;border-bottom:1px solid #2a2f3d;background:#1d212c;flex-shrink:0;}
+#mc2proto .mc-title{font-size:17px;letter-spacing:2px;font-weight:600;}
+#mc2proto .mc-sub{font-size:12px;color:#6b7180;}
+#mc2proto .mc-close{margin-left:auto;width:32px;height:32px;border-radius:8px;border:1px solid #2a2f3d;background:transparent;color:#9aa0ad;font-size:15px;cursor:pointer;line-height:1;font-family:inherit;}
+#mc2proto .mc-close:hover{border-color:#f87171;color:#f87171;}
+#mc2proto .mc-body{flex:1;display:flex;min-height:0;}
+#mc2proto .mc-side{width:280px;flex-shrink:0;border-right:1px solid #2a2f3d;overflow-y:auto;padding:8px;display:flex;flex-direction:column;}
+#mc2proto .mc-cat{font-size:11px;color:#6b7180;letter-spacing:2px;padding:8px 10px 4px;}
+#mc2proto .mc-row{display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:8px;cursor:pointer;border:1px solid transparent;outline:none;}
+#mc2proto .mc-row:hover{background:rgba(255,255,255,.03);}
+#mc2proto .mc-row.sel{background:rgba(232,163,61,.13);border-color:rgba(232,163,61,.27);}
+#mc2proto .mc-row:focus-visible{border-color:rgba(232,163,61,.55);}
+#mc2proto .mc-row .st{width:8px;height:8px;border-radius:50%;background:#4ade80;flex-shrink:0;}
+#mc2proto .mc-row.off .st{background:#565d6d;}
+#mc2proto .mc-row .nm{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
+#mc2proto .mc-row.off .nm{color:#6b7180;}
+#mc2proto .mc-row .ver{font-size:10.5px;color:#6b7180;font-family:Consolas,monospace;flex-shrink:0;}
+#mc2proto .mc-row .sp{flex:1;}
+#mc2proto .mc-row.dragging{opacity:.35;}
+#mc2proto .mc-row.drop-above{box-shadow:0 -2px 0 0 #e8a33d;}
+#mc2proto .mc-row.drop-below{box-shadow:0 2px 0 0 #e8a33d;}
+#mc2proto .mc-ics{display:flex;align-items:center;gap:3px;flex-shrink:0;}
+/* 图标徽标：18px 圆片，色随级、形随义（⚠ 冲突 / ⇄ 碰撞 / ◎ 同域 / ↑ 可更新 / ⟳ 待生效） */
+#mc2proto .mc-ic{width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9.5px;line-height:1;border:1px solid;cursor:pointer;font-family:"Segoe UI Symbol",inherit;position:relative;}
+#mc2proto .mc-ic:hover{filter:brightness(1.25);}
+#mc2proto .mc-ic.red{color:#f87171;border-color:rgba(248,113,113,.45);background:rgba(248,113,113,.1);}
+#mc2proto .mc-ic.orange{color:#fbbf24;border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.08);}
+#mc2proto .mc-ic.gray{color:#8a90a0;border-color:rgba(138,144,160,.4);background:rgba(138,144,160,.08);}
+#mc2proto .mc-ic.blue{color:#60a5fa;border-color:rgba(96,165,250,.5);background:rgba(96,165,250,.1);}
+#mc2proto .mc-ic.amber{color:#e8a33d;border-color:rgba(232,163,61,.5);background:rgba(232,163,61,.1);cursor:default;}
+#mc2proto .mc-ic .nd{position:absolute;top:-2px;right:-2px;width:6px;height:6px;border-radius:50%;background:#f87171;border:1.5px solid #171a23;display:none;}
+#mc2proto .mc-ic.multi .nd{display:block;}
+#mc2proto .mc-sw{width:30px;height:17px;border-radius:9px;background:#565d6d;position:relative;cursor:pointer;flex-shrink:0;transition:.15s;border:0;appearance:none;outline:none;}
+#mc2proto .mc-sw::after{content:"";position:absolute;left:2px;top:2px;width:13px;height:13px;border-radius:50%;background:#cfd3dc;transition:.15s;}
+#mc2proto .mc-sw.on{background:#4ade80;}
+#mc2proto .mc-sw.on::after{left:15px;}
+#mc2proto .mc-grip{color:#4b5261;font-size:11px;letter-spacing:-2px;cursor:grab;flex-shrink:0;padding:0 2px;}
+#mc2proto .mc-row.dragging .mc-grip{cursor:grabbing;}
+#mc2proto .mc-repo-entry{margin:4px 6px 8px;padding:10px 12px;border-radius:10px;border:1px solid rgba(96,165,250,.3);background:rgba(96,165,250,.07);cursor:pointer;display:flex;align-items:center;gap:10px;}
+#mc2proto .mc-repo-entry:hover{background:rgba(96,165,250,.12);}
+#mc2proto .mc-repo-entry .tt{font-size:12.5px;color:#60a5fa;}
+#mc2proto .mc-repo-entry .dd{font-size:11px;color:#6b7180;margin-top:3px;display:flex;align-items:center;gap:5px;}
+#mc2proto .mc-ordbar{margin:4px 6px 8px;padding:9px 12px;border-radius:10px;border:1px dashed rgba(232,163,61,.45);font-size:11px;color:#9aa0ad;line-height:1.7;}
+#mc2proto .mc-ordbar .acts{display:flex;gap:6px;margin-top:7px;}
+#mc2proto .mc-side-foot{margin-top:auto;padding:8px 6px 4px;border-top:1px solid #2a2f3d;}
+#mc2proto .mc-side-foot button{width:100%;background:#0f1219;border:1px solid #2a2f3d;color:#9aa0ad;border-radius:8px;padding:7px 0;font-size:12px;cursor:pointer;font-family:inherit;}
+#mc2proto .mc-side-foot button:hover{border-color:#e8a33d;color:#e8a33d;}
+#mc2proto .mc-main{flex:1;overflow-y:auto;padding:16px 22px 64px;min-width:0;}
+#mc2proto .mc-main h2{font-size:18px;font-weight:600;}
+#mc2proto .mc-main .desc{margin:8px 0 4px;font-size:13px;color:#9aa0ad;line-height:1.6;}
+#mc2proto .mc-grp{margin-top:18px;}
+#mc2proto .mc-grp>h3{font-size:12.5px;color:#e8a33d;letter-spacing:2px;padding-bottom:7px;border-bottom:1px solid #2a2f3d;margin-bottom:10px;font-weight:500;}
+#mc2proto .mc-kv{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px;flex-wrap:wrap;}
+#mc2proto .mc-kv .k{color:#9aa0ad;width:88px;flex-shrink:0;}
+#mc2proto .mc-kv .v{font-family:Consolas,monospace;font-size:12.5px;}
+#mc2proto .btn{background:#0f1219;border:1px solid #2a2f3d;color:#9aa0ad;border-radius:7px;padding:6px 14px;font-size:12.5px;cursor:pointer;font-family:inherit;}
+#mc2proto .btn:hover{border-color:#e8a33d;color:#e8a33d;}
+#mc2proto .btn.pri{border-color:rgba(232,163,61,.5);color:#e8a33d;background:rgba(232,163,61,.1);}
+#mc2proto .btn.pri:hover{background:rgba(232,163,61,.18);}
+#mc2proto .btn.blue{border-color:rgba(96,165,250,.45);color:#60a5fa;}
+#mc2proto .btn.blue:hover{background:rgba(96,165,250,.1);}
+#mc2proto .btn.danger{border-color:rgba(248,113,113,.4);color:#f87171;}
+#mc2proto .btn.danger:hover{background:rgba(248,113,113,.1);}
+#mc2proto .btn.org{border-color:rgba(251,191,36,.5);color:#fbbf24;}
+#mc2proto .btn.org:hover{background:rgba(251,191,36,.1);}
+#mc2proto .btn:disabled{opacity:.4;cursor:not-allowed;}
+#mc2proto .btn.mini{padding:3px 10px;font-size:11.5px;}
+#mc2proto .mc-repo-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+#mc2proto .mc-repo-top .lc{margin-left:auto;font-size:11px;color:#6b7180;}
+#mc2proto .mc-repo-row{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:9px;border:1px solid transparent;}
+#mc2proto .mc-repo-row:hover{background:rgba(255,255,255,.03);}
+#mc2proto .mc-repo-row .n{width:170px;font-size:13.5px;flex-shrink:0;}
+#mc2proto .mc-repo-row .cols{font-family:Consolas,monospace;font-size:12px;color:#9aa0ad;flex-shrink:0;}
+#mc2proto .mc-repo-row .cols b{color:#4ade80;font-weight:400;}
+#mc2proto .mc-repo-row .cols i{color:#6b7180;font-style:normal;}
+#mc2proto .mc-repo-row .sp{flex:1;}
+#mc2proto .mc-repo-row .why{font-size:11px;color:#f87171;}
+#mc2proto .mc-rep-hd{display:flex;gap:14px;padding:6px 12px;font-size:11px;color:#6b7180;letter-spacing:1px;}
+#mc2proto .mc-rep-item{border:1px solid #2a2f3d;border-radius:10px;padding:12px 14px;margin-bottom:10px;}
+#mc2proto .mc-rep-item .tt{display:flex;align-items:center;gap:8px;font-size:13.5px;}
+#mc2proto .mc-rep-item .bd{margin-top:8px;font-size:12.5px;color:#9aa0ad;line-height:1.7;}
+#mc2proto .mc-rep-item .bd b{color:#e8e6e0;font-weight:500;}
+#mc2proto .mc-bd{border-radius:7px;font-size:10px;padding:2px 7px;line-height:1.3;border:1px solid;font-family:inherit;}
+#mc2proto .mc-bd.red{color:#f87171;border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.1);}
+#mc2proto .mc-bd.orange{color:#fbbf24;border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.08);}
+#mc2proto .mc-bd.gray{color:#8a90a0;border-color:rgba(138,144,160,.35);background:rgba(138,144,160,.07);}
+#mc2proto .mc-risk{margin-top:10px;padding:8px 12px;border-radius:8px;font-size:11.5px;line-height:1.6;background:rgba(127,29,29,.18);border:1px solid rgba(248,113,113,.25);color:#fca5a5;}
+#mc2proto .mc-ok{color:#4ade80;font-size:11.5px;}
+#mc2proto .mc-pending{position:absolute;left:0;right:0;bottom:0;display:none;align-items:center;gap:12px;padding:9px 18px;background:#1d212c;border-top:1px solid rgba(232,163,61,.4);font-size:12.5px;z-index:5;}
+#mc2proto .mc-pending .sp{flex:1;}
+#mc2proto .mc-modal-bg{position:absolute;inset:0;background:rgba(5,6,10,.66);display:none;align-items:center;justify-content:center;z-index:9;}
+#mc2proto .mc-modal{width:520px;max-width:92%;max-height:86%;overflow-y:auto;background:#1d212c;border:1px solid #2a2f3d;border-radius:12px;padding:18px 20px;box-shadow:0 22px 80px rgba(0,0,0,.8);}
+#mc2proto .mc-modal h3{font-size:15.5px;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+#mc2proto .mc-modal .sub{font-size:11.5px;color:#6b7180;margin-bottom:12px;}
+#mc2proto .mc-modal .sec{margin-top:12px;}
+#mc2proto .mc-modal .sec .h{font-size:11.5px;color:#e8a33d;letter-spacing:2px;margin-bottom:6px;}
+#mc2proto .mc-modal .txt{font-size:12.5px;color:#9aa0ad;line-height:1.75;}
+#mc2proto .mc-modal .files{font-family:Consolas,monospace;font-size:11.5px;color:#9aa0ad;line-height:1.9;}
+#mc2proto .mc-modal .files .del{color:#f87171;}
+#mc2proto .mc-modal .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+#mc2proto .mc-toast{position:absolute;top:64px;left:50%;transform:translateX(-50%);background:#0f1219;border:1px solid rgba(74,222,128,.4);color:#4ade80;border-radius:8px;padding:8px 16px;font-size:12.5px;display:none;z-index:10;}
+</style>
+
+<div class="mc-stage">
+<div class="mc-panel" id="mcP">
+  <div class="mc-head">
+    <div class="mc-title">MOD 管理中心</div>
+    <div class="mc-sub">管理 · 仓库 · 体检 · 排序</div>
+    <button class="mc-close" aria-label="关闭面板">×</button>
+  </div>
+  <div class="mc-body">
+    <div class="mc-side" id="side"></div>
+    <div class="mc-main" id="main"></div>
+  </div>
+  <div class="mc-pending" id="pend"><span aria-hidden="true">⟳</span><span id="pendTx"></span><span class="sp"></span><button class="btn mini" data-x="undo">撤销</button><button class="btn pri mini" data-x="reboot">立即重启</button></div>
+  <div class="mc-modal-bg" id="mbg"><div class="mc-modal" id="mdl"></div></div>
+  <div class="mc-toast" id="tst"></div>
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- 数据（镜像实机：GUID 字母序 = 实测加载序） ---------- */
+var MODS = [
+ {k:"bt", g:"com.ivmakk.survivallog.bettertrade", n:"BetterTrade", v:"2.3.1", cat:"tp", on:true,  cf:["bt"]},
+ {k:"su", g:"com.ivmakk.survivallog.statsui",    n:"StatsUI",      v:"1.4.2", cat:"tp", on:true,  cf:[]},
+ {k:"sce",g:"com.jangfullmoon.storagecapacityexpansion", n:"储物扩容", v:"1.3.0", cat:"tp", on:true, cf:["sce"]},
+ {k:"bpe",g:"com.local.survivallog.backpackexpand", n:"背包扩容", v:"1.7.0", cat:"sl", on:true, cf:["sce","es"]},
+ {k:"cbu",g:"com.local.survivallog.cabinetburden", n:"柜子负重解放", v:"1.7.0", cat:"sl", on:true, cf:[]},
+ {k:"cew",g:"com.local.survivallog.cabineteverywhere", n:"储物柜直达", v:"1.1.2", cat:"sl", on:true, cf:["sce","bt"]},
+ {k:"csz",g:"com.local.survivallog.cabinetsize", n:"柜子容量个性化", v:"4.1.0", cat:"sl", on:true, cf:["sce"]},
+ {k:"eg", g:"com.local.survivallog.endlessguard", n:"无尽守护", v:"1.7.0", cat:"sl", on:true, cf:[]},
+ {k:"fc", g:"com.local.survivallog.fridgechill", n:"保鲜冷链", v:"1.7.0", cat:"sl", on:true, cf:[]},
+ {k:"mc", g:"com.local.survivallog.modcenter", n:"MOD 管理中心", v:"1.7.0", cat:"sl", on:true, cf:[]},
+ {k:"pp", g:"com.local.survivallog.planpick", n:"自选生存规划", v:"1.2.0", cat:"sl", on:true, cf:[]},
+ {k:"pds",g:"com.local.survivallog.predisasterspeed", n:"灾前加速", v:"1.7.0", cat:"sl", on:true, cf:[]},
+ {k:"qa", g:"com.local.survivallog.quickaction", n:"动作加速", v:"2.1.2", cat:"sl", on:true, cf:[]},
+ {k:"rs", g:"com.local.survivallog.robotspeed", n:"机器人提速", v:"1.7.0", cat:"sl", on:true, cf:[]},
+ {k:"ru", g:"com.local.survivallog.roleunlock", n:"角色解锁", v:"1.7.0", cat:"sl", on:true, cf:[]},
+ {k:"es", g:"survivallog.expandedstorage", n:"背包扩展", v:"1.0.6", cat:"tp", on:true, cf:["es"]}
+];
+var DESC = {bt:"第三方 · 交易优化（com.ivmakk）", su:"第三方 · 属性面板（com.ivmakk）", sce:"第三方 · 储物容量扩展（com.jangfullmoon）", bpe:"三键数值化背包扩容 + 天赋加行", cbu:"柜子负重写 0 = 官方无限制语义", cew:"工作台/交易/温室直接取用柜内物品", csz:"13 包专属块 + 通用 + 个性化清单（v4 数值框）", eg:"无尽模式沦陷守护 + 方案补授", fc:"MaxTotalMult 可配的保鲜修正", mc:"套件统一管理面板（本 mod）", pp:"RogueSelect 页自选生存规划（D100-D300）", pds:"灾前阶段真三倍速 + 热键", qa:"ActionType 耗时统一修改 + 监视", rs:"机器人五杠杆提速（默认 ×2）", ru:"角色解锁进度查看", es:"第三方 · 玩家背包扩容/负重 ×10"};
+var CF = {
+ sce:{lv:"red", ic:"⚠", tag:"冲突", title:"储物改写冲突（已知冲突库）",
+   who:["储物扩容（第三方）","柜子容量个性化","背包扩容","储物柜直达"],
+   reason:"StorageCapacityExpansion v1.3.0 把 73 件柜族家具的容器 ID 改写到共享包并改写包尺寸，还强写部分家具保鲜/耗电参数。与套件储物类的数值改写<b>相乘叠加</b>（×1.5 ×1.5 = ×2.25），并可能使储物柜直达的镜像缓存错位失效。",
+   tips:["停用 / 卸载第三方侧（推荐）","停用套件侧任一受影响 mod","调整加载顺序<b>无法</b>解决数值叠加"]},
+ bt:{lv:"orange", ic:"⇄", tag:"碰撞", title:"补丁碰撞（运行时实测）",
+   who:["BetterTrade","储物柜直达"],
+   reason:"面板扫描发现两者对同一游戏方法 <b>BagComponent.OnInit</b> 挂了补丁。执行结果取决于加载顺序（后写覆盖前写），当前顺序下 BetterTrade 后加载。",
+   tips:["停用其中一方","尝试调整加载顺序（仅缓解写序类冲突，风险自负）"]},
+ es:{lv:"gray", ic:"◎", tag:"同域", title:"同域共存（类型标注）",
+   who:["背包扩展（第三方）","背包扩容"],
+   reason:"两者同属玩家背包扩容域：第三方做扩行 + 负重 ×10，套件做三键数值化。机制正交但数值叠加可能超出预期，自行取舍。",
+   tips:["保留一方","维持现状（接受叠加结果）"]}
+};
+var REPO = [
+ {n:"背包扩容", loc:"1.7.0", rem:"1.7.0", st:"ok"},
+ {n:"柜子负重解放", loc:"1.7.0", rem:"1.7.0", st:"ok"},
+ {n:"储物柜直达", loc:"1.1.2", rem:"1.1.3", st:"upd"},
+ {n:"柜子容量个性化", loc:"4.1.0", rem:"4.2.0", st:"upd"},
+ {n:"无尽守护", loc:"1.7.0", rem:"1.7.0", st:"ok"},
+ {n:"保鲜冷链", loc:"1.7.0", rem:"1.7.0", st:"ok"},
+ {n:"MOD 管理中心", loc:"1.7.0", rem:"1.7.0", st:"self"},
+ {n:"自选生存规划", loc:"1.2.0", rem:"1.3.0", st:"warn", why:"游戏版本不符（资产基线 2026-10-21_5）"},
+ {n:"灾前加速", loc:"1.7.0", rem:"1.7.0", st:"ok"},
+ {n:"机器人提速", loc:"1.7.0", rem:"1.7.0", st:"ok"},
+ {n:"动作加速", loc:"2.1.2", rem:"1.7.0", st:"down"},
+ {n:"角色解锁", loc:"—", rem:"1.7.0", st:"inst"}
+];
+function repoOf(m){
+ var map={bpe:"背包扩容",cbu:"柜子负重解放",cew:"储物柜直达",csz:"柜子容量个性化",eg:"无尽守护",fc:"保鲜冷链",mc:"MOD 管理中心",pp:"自选生存规划",pds:"灾前加速",qa:"动作加速",rs:"机器人提速",ru:"角色解锁"};
+ return REPO.filter(function(r){return r.n===map[m.k];})[0] || {loc:"—",rem:"—",st:"ok"};
+}
+var LVS=["red","orange","gray"];
+
+/* ---------- 状态 ---------- */
+var S = {sel:"csz", order:MODS.map(function(m){return m.k;}), orderMode:false, repoView:false, pending:{}, pendSeq:0};
+function $(id){ return document.getElementById(id); }
+function modOf(k){ return MODS.filter(function(m){return m.k===k;})[0]; }
+function topLv(list){ for(var i=0;i<LVS.length;i++) for(var j=0;j<list.length;j++) if(CF[list[j]].lv===LVS[i]) return LVS[i]; return null; }
+function lvOf(list){ var o=[]; LVS.forEach(function(l){ if(list.some(function(k){return CF[k].lv===l;})) o.push(l); }); return o; }
+function pendCount(){ return Object.keys(S.pending).length; }
+function addPending(k,label){ S.pending[k]=label; render(); }
+
+/* ---------- 图标徽标 ---------- */
+function icHtml(kind,title,extra,guid){
+ var cls = kind==="upd"?"blue":(kind==="down"?"orange":(kind==="pend"?"amber":kind));
+ var glyph = kind==="upd"?"↑":(kind==="down"?"↓":(kind==="pend"?"⟳":CF[extra].ic));
+ return '<span class="mc-ic '+cls+(extra&&extra.__multi?" multi":"")+'" role="button" tabindex="0" data-kind="'+kind+'" data-g="'+guid+'" title="'+title+'" aria-label="'+title+'">'+glyph+'<span class="nd" aria-hidden="true"></span></span>';
+}
+
+/* ---------- 侧栏 ---------- */
+function renderSide(){
+ var box=$("side"); box.innerHTML="";
+ if(!S.orderMode){
+   var ups=REPO.filter(function(r){return r.st==="upd";}).length;
+   var ent=document.createElement("div"); ent.className="mc-repo-entry"; ent.setAttribute("role","button"); ent.tabIndex=0;
+   ent.innerHTML='<div><div class="tt">套件仓库 · 在线安装 / 更新</div><div class="dd">'
+     +'<span class="mc-ic blue" style="width:13px;height:13px;font-size:7.5px;border-radius:50%" aria-hidden="true">↑</span>'+ups+' 个可更新'
+     +' · 1 个可安装 · 1 个版本告警</div></div>';
+   ent.onclick=function(){ S.repoView=true; render(); };
+   box.appendChild(ent);
+ } else {
+   var bar=document.createElement("div"); bar.className="mc-ordbar";
+   bar.innerHTML='<b style="color:#e8a33d;font-weight:500">排序模式</b> — 拖拽行调整顺序；选中行后也可用 ↑ ↓ 键移动（无障碍替代）。硬依赖链条目自动保持依赖序。'
+     +'<div class="acts"><button class="btn mini" data-act="ordreset">恢复默认</button><button class="btn pri mini" data-act="ordsave">保存顺序</button></div>';
+   box.appendChild(bar);
+ }
+ if(S.orderMode){
+   var h0=document.createElement("div"); h0.className="mc-cat"; h0.textContent="加载顺序（默认 = 模组 ID 字母序）";
+   box.appendChild(h0);
+   S.order.forEach(function(k){ appendRow(box, modOf(k)); });
+ } else {
+   ["sl","tp"].forEach(function(cat){
+     var h=document.createElement("div"); h.className="mc-cat";
+     h.textContent = cat==="sl" ? "套件 MOD" : "第三方 MOD";
+     box.appendChild(h);
+     MODS.filter(function(m){return m.cat===cat;}).forEach(function(m){ appendRow(box, m); });
+   });
+ }
+ var foot=document.createElement("div"); foot.className="mc-side-foot";
+ var fb=document.createElement("button");
+ fb.textContent = S.orderMode?"退出排序模式":"加载排序模式";
+ fb.onclick=function(){ S.orderMode=!S.orderMode; if(S.orderMode) S.repoView=false; render(); };
+ foot.appendChild(fb); box.appendChild(foot);
+ wireSide(box);
+}
+/* ---------- 行构建（常规=分类序；排序模式=S.order 平铺序） ---------- */
+function appendRow(box,m){
+     var row=document.createElement("div");
+     row.className="mc-row"+(m.on?"":" off")+((S.sel===m.k&&!S.orderMode)?" sel":"");
+     row.setAttribute("data-guid",m.g); row.setAttribute("data-k",m.k);
+     var idx=S.order.indexOf(m.k);
+     var html="";
+     if(S.orderMode){
+       row.tabIndex=0; row.draggable=true;
+       html+='<span class="mc-grip" aria-hidden="true">⋮⋮</span><span class="ver">'+String(idx+1).padStart(2,"0")+'</span>';
+     } else {
+       html+='<span class="st" aria-hidden="true"></span>';
+     }
+     html+='<span class="nm">'+m.n+'</span><span class="ver">'+m.v+'</span><span class="sp"></span>';
+     var ics="";
+     if(!S.orderMode){
+       var rp=repoOf(m);
+       if(rp.st==="upd") ics+=icHtml("upd","可更新到 "+rp.rem+" · 点击确认",'',m.k);
+       else if(rp.st==="down") ics+=icHtml("down","远端 "+rp.rem+" 低于本地 "+rp.loc+" · 点击确认（版本回退，风险自担）",'',m.k);
+       if(S.pending[m.k]) ics+=icHtml("pend","待生效："+S.pending[m.k]+"（重启后应用）",'',m.k);
+     }
+     if(m.cf.length){
+       var lvs=lvOf(m.cf);
+       lvs.forEach(function(lv){
+         var key=m.cf.filter(function(x){return CF[x].lv===lv;})[0];
+         ics+=icHtml(lv, CF[key].tag+" · "+CF[key].title.replace(/（.*）/,"")+"（"+m.cf.length+" 项）· 点击查看", key, m.k);
+       });
+     }
+     if(ics) html+='<span class="mc-ics">'+ics+'</span>';
+     if(!S.orderMode) html+='<button class="mc-sw'+(m.on?" on":"")+'" data-sw="'+m.k+'" aria-label="'+(m.on?"停用":"启用")+' '+m.n+'"></button>';
+     row.innerHTML=html;
+     box.appendChild(row);
+}
+function wireSide(box){
+ box.querySelectorAll("[data-sw]").forEach(function(el){ el.onclick=function(ev){ ev.stopPropagation(); var m=modOf(el.getAttribute("data-sw")); m.on=!m.on; render(); }; });
+ box.querySelectorAll(".mc-ic[data-kind]").forEach(function(el){
+   var act=function(ev){ ev.stopPropagation();
+     var g=el.getAttribute("data-g"), kind=el.getAttribute("data-kind");
+     if(kind==="upd"||kind==="down") openModal(updHtml(modOf(g)));
+     else openModal(cfHtml(modOf(g)));
+   };
+   el.onclick=act;
+   el.onkeydown=function(ev){ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); act(ev); } };
+ });
+ box.querySelectorAll(".mc-row").forEach(function(row){
+   row.onclick=function(ev){
+     if(ev.target.closest("[data-sw],.mc-ic")) return;
+     var m=modOf(row.getAttribute("data-k"));
+     if(!S.orderMode){ S.sel=m.k; S.repoView=false; render(); }
+   };
+ });
+ box.querySelectorAll("[data-act]").forEach(function(el){
+   el.onclick=function(ev){ ev.stopPropagation();
+     var a=el.getAttribute("data-act");
+     if(a==="ordreset"){ S.order=MODS.map(function(m){return m.k;}); render(); toast("已恢复默认顺序（ID 字母序）"); }
+     if(a==="ordsave"){ addPending("_order","加载顺序调整"); toast("顺序已保存，重启后由启动清理器应用"); }
+   };
+ });
+ wireDnD(box);
+}
+
+/* ---------- 拖拽 + 键盘替代 ---------- */
+function reorder(from,to){
+ if(from===to||from<0||to<0||from>=S.order.length) return;
+ var k=S.order.splice(from,1)[0];
+ if(to>S.order.length) to=S.order.length;
+ S.order.splice(to,0,k); render();
+}
+function wireDnD(box){
+ var srcIdx=null;
+ box.querySelectorAll(".mc-row").forEach(function(row){
+   row.addEventListener("dragstart",function(e){
+     srcIdx=S.order.indexOf(row.getAttribute("data-k"));
+     e.dataTransfer.effectAllowed="move";
+     try{ e.dataTransfer.setData("text/plain",String(srcIdx)); }catch(_){}
+     row.classList.add("dragging");
+   });
+   row.addEventListener("dragend",function(){ row.classList.remove("dragging"); clearDrops(box); });
+   row.addEventListener("dragover",function(e){
+     if(srcIdx===null) return;
+     e.preventDefault(); e.dataTransfer.dropEffect="move";
+     clearDrops(box);
+     var r=row.getBoundingClientRect();
+     row.classList.add(e.clientY < r.top+r.height/2 ? "drop-above":"drop-below");
+   });
+   row.addEventListener("dragleave",function(){ row.classList.remove("drop-above","drop-below"); });
+   row.addEventListener("drop",function(e){
+     if(srcIdx===null) return;
+     e.preventDefault(); clearDrops(box);
+     var r=row.getBoundingClientRect();
+     var below=e.clientY >= r.top+r.height/2;
+     var to=S.order.indexOf(row.getAttribute("data-k"))+(below?1:0);
+     if(to>srcIdx) to--;
+     reorder(srcIdx,to); srcIdx=null;
+   });
+   row.addEventListener("keydown",function(e){
+     if(!S.orderMode) return;
+     var i=S.order.indexOf(row.getAttribute("data-k"));
+     if(e.key==="ArrowUp"){ e.preventDefault(); reorder(i,i-1); focusRow(i-1); }
+     if(e.key==="ArrowDown"){ e.preventDefault(); reorder(i,i+1); focusRow(i+1); }
+   });
+ });
+}
+function clearDrops(box){ box.querySelectorAll(".mc-row").forEach(function(r){ r.classList.remove("drop-above","drop-below"); }); }
+function focusRow(i){ var rows=$("side").querySelectorAll(".mc-row"); if(rows[i]) rows[i].focus(); }
+
+/* ---------- 主区 ---------- */
+function detailHtml(m){
+ var rp=repoOf(m);
+ var h='<h2>'+m.n+' <span style="font-size:12px;color:#6b7180;font-weight:400">'+m.g+'</span></h2>'
+  +'<div class="desc">'+(DESC[m.k]||"")+'</div>';
+ if(S.pending[m.k]){
+   h+='<div class="mc-grp"><h3>待生效操作</h3><div class="mc-kv"><span class="mc-ic amber" style="cursor:default" aria-hidden="true">⟳</span><span style="font-size:12.5px;color:#e8a33d">'+S.pending[m.k]+' —— 重启游戏后由启动清理器执行（底部待生效条可撤销）</span></div></div>';
+ }
+ h+='<div class="mc-grp"><h3>版本与维护</h3>'
+  +'<div class="mc-kv"><span class="k">已装版本</span><span class="v">'+m.v+'</span>'
+  +'<span class="k" style="width:auto;margin-left:14px">远端最新</span><span class="v" style="color:'+(rp.st==="down"?"#fbbf24":"#60a5fa")+'">'+rp.rem+'</span>'
+  +(rp.st==="upd"?'<button class="btn pri mini" data-act="upd" data-g="'+m.k+'">更新到 '+rp.rem+'</button>':"")
+  +(rp.st==="down"?'<button class="btn org mini" data-act="upd" data-g="'+m.k+'">降级更新</button>'
+     +'<button class="btn mini" data-act="reinst" data-g="'+m.k+'">重装当前版本</button>':"")
+  +(rp.st==="warn"?'<button class="btn org mini" data-act="upd" data-g="'+m.k+'">更新（版本告警）</button>':"")
+  +'</div>'
+  +'<div class="mc-kv"><span class="k">维护动作</span>'
+  +'<button class="btn mini" data-act="off" data-g="'+m.k+'">'+(m.on?"停用（可恢复）":"启用")+'</button> '
+  +'<button class="btn danger mini" data-act="del" data-g="'+m.k+'">卸载…</button>'
+  +'<span style="font-size:11px;color:#6b7180">彻底删除 dll / cfg / 管理记录，重启后生效</span></div>'
+  +'</div>';
+ h+='<div class="mc-grp"><h3>常用配置（示意）</h3>'
+  +'<div class="mc-kv"><span class="k">速度倍率</span><input type="range" min="1" max="5" value="2" style="flex:1;accent-color:#e8a33d;" aria-label="速度倍率"><span class="v">×2.0</span></div>'
+  +'<div class="mc-kv"><span class="k">生效方式</span><span style="font-size:12px;color:#9aa0ad">热生效（改值即应用，套件 mod 支持免重启调参）</span></div>'
+  +'</div>';
+ return h;
+}
+function repoHtml(){
+ var ups=REPO.filter(function(r){return r.st==="upd";}).length;
+ var h='<h2>套件仓库</h2><div class="desc">来自 GitHub 组织 survivallog-mods（12 个独立仓库），下载经 MD5 校验，安装 / 更新在下次启动时由启动清理器落位。点击任意已装 mod 返回管理视图。</div>'
+  +'<div class="mc-repo-top"><button class="btn mini" data-act="back">← 返回管理</button>'
+  +'<button class="btn blue mini" data-act="chk">检查更新</button>'
+  +(ups?'<button class="btn pri mini" data-act="updall">全部更新（'+ups+'）</button>':"")
+  +'<span class="lc">上次检查：今天 21:58 · 直连</span></div>'
+  +'<div class="mc-rep-hd"><span style="width:170px">MOD</span><span>本地 → 远端</span></div>';
+ REPO.forEach(function(r){
+   h+='<div class="mc-repo-row"><span class="n">'+r.n+'</span>';
+   if(r.st==="inst") h+='<span class="cols"><i>未安装</i> → <b>'+r.rem+'</b></span>';
+   else if(r.st==="down") h+='<span class="cols">'+r.loc+' → <i style="color:#fbbf24">'+r.rem+'（低于本地）</i></span>';
+   else h+='<span class="cols">'+r.loc+(r.rem!==r.loc?' → <b>'+r.rem+'</b>':'')+'</span>';
+   h+='<span class="sp"></span>';
+   if(r.why) h+='<span class="why" title="'+r.why+'">⚠ '+r.why+'</span>';
+   if(r.st==="upd") h+='<button class="btn pri mini" data-act="upd" data-n="'+r.n+'">更新</button>';
+   else if(r.st==="down") h+='<button class="btn org mini" data-act="upd" data-n="'+r.n+'">降级更新</button>';
+   else if(r.st==="inst") h+='<button class="btn blue mini" data-act="inst" data-n="'+r.n+'">安装</button>';
+   else if(r.st==="warn") h+='<button class="btn org mini" data-act="upd" data-n="'+r.n+'" title="'+r.why+'">更新</button>';
+   else if(r.st==="ahead") h+='<button class="btn mini" data-act="reinst" data-n="'+r.n+'">重装当前版本</button>';
+   else h+='<span class="mc-ok">✓ 最新</span>';
+   h+='</div>';
+ });
+ return h;
+}
+
+/* ---------- 弹窗 ---------- */
+function cfHtml(m){
+ var h="";
+ m.cf.forEach(function(k,i){
+   var c=CF[k];
+   if(i>0) h+='<div style="border-top:1px solid #2a2f3d;margin-top:14px"></div>';
+   h+='<h3><span class="mc-ic '+c.lv+'" style="cursor:default" aria-hidden="true">'+c.ic+'</span>'+m.n+' · '+c.tag+'</h3><div class="sub">'+c.title+'</div>'
+     +'<div class="sec"><div class="h">冲突对象</div><div class="txt"><b style="color:#e8e6e0">'+c.who.join("、")+'</b></div></div>'
+     +'<div class="sec"><div class="h">原因</div><div class="txt">'+c.reason+'</div></div>'
+     +'<div class="sec"><div class="h">处置建议（自担选择）</div><div class="txt">'+c.tips.map(function(t,j){return (j+1)+". "+t;}).join("<br>")+'</div></div>';
+ });
+ h+='<div class="mc-risk">调整加载顺序只能规避部分冲突（写序类），不能解决数值叠加类冲突。</div>'
+   +'<div class="acts"><button class="btn mini" data-mact="close">关闭</button>'
+   +'<button class="btn mini" data-mact="offone" data-k="'+m.k+'">停用此 mod</button>'
+   +'<button class="btn danger mini" data-mact="del" data-k="'+m.k+'">卸载此 mod…</button></div>';
+ return h;
+}
+function updHtml(m){
+ var rp=repoOf(m);
+ var isDown=rp.st==="down", isWarn=rp.st==="warn";
+ var act=isDown?"降级到":"更新到";
+ var h='<h3><span class="mc-ic '+(isDown?"orange":"blue")+'" style="cursor:default" aria-hidden="true">'+(isDown?"↓":"↑")+'</span>'+(isDown?"降级":"更新")+' · '+m.n+'</h3>'
+  +'<div class="sub">套件仓库 · survivallog-mods/'+m.k+'（演示数据）</div>'
+  +'<div class="sec"><div class="h">版本</div><div class="mc-kv" style="padding:0"><span class="v">'+rp.loc+'</span>'
+  +'<span style="color:#6b7180">→</span><span class="v" style="color:'+(isDown?"#fbbf24":"#60a5fa")+';font-size:14px">'+rp.rem+'</span></div></div>';
+ if(isDown) h+='<div class="mc-risk">⚠ 版本回退：本地 '+rp.loc+' 高于远端 '+rp.rem+'，旧版功能可能与存档/其他 mod 不匹配。是否降级由你决定。</div>';
+ else if(isWarn) h+='<div class="mc-risk">⚠ 游戏版本不符（资产基线 2026-10-21_5）：该版本可能与你当前的游戏不兼容，存在闪退风险。是否继续由你决定。</div>';
+ h+='<div class="sec"><div class="h">校验与生效</div><div class="txt">下载后 MD5 校验（对 update.json）→ 暂存 → 重启游戏时由启动清理器原子替换（插件加载前，旧版不删可回退）。</div></div>'
+  +'<div class="acts"><button class="btn mini" data-mact="close">取消</button>'
+  +'<button class="btn '+(isDown?"org":"pri")+'" data-mact="doupd" data-k="'+m.k+'" data-v="'+rp.rem+'">'+act+' '+rp.rem+'</button></div>';
+ return h;
+}
+function delHtml(m){
+ return '<h3><span class="mc-ic red" style="cursor:default" aria-hidden="true">⚠</span>卸载 · '+m.n+'</h3><div class="sub">彻底删除，重启游戏后由启动清理器执行（插件加载前，文件无锁）。</div>'
+  +'<div class="sec"><div class="h">将删除</div><div class="files">'
+  +'<div class="del">BepInEx\\plugins\\'+m.g.split(".").pop().replace(/^./,function(c){return c.toUpperCase();})+'.dll</div>'
+  +'<div class="del">BepInEx\\config\\'+m.n+'.cfg</div>'
+  +'<div class="del">ModCenter 停用 / 排序记录（如有）</div></div></div>'
+  +'<div class="sec"><div class="h">不受影响</div><div class="txt">游戏存档、其他 mod、BepInEx 基座。</div></div>'
+  +'<div class="acts"><button class="btn mini" data-mact="close">取消</button><button class="btn danger" data-mact="dodel" data-k="'+m.k+'" data-n="'+m.n+'">确认卸载</button></div>';
+}
+function openModal(html){
+ var mdl=$("mdl"); mdl.innerHTML=html; $("mbg").style.display="flex";
+ mdl.querySelectorAll("[data-mact]").forEach(function(el){
+   el.onclick=function(ev){ ev.stopPropagation();
+     var a=el.getAttribute("data-mact"), g=el.getAttribute("data-k")||S.sel, m=modOf(g);
+     if(a==="close") closeModal();
+     else if(a==="offone"){ closeModal(); m.on=false; render(); toast("已停用（重启级）"); }
+     else if(a==="del"){ closeModal(); openModal(delHtml(m)); }
+     else if(a==="dodel"){ closeModal(); addPending(m.k,"卸载 "+m.n); toast("已加入待生效清单，重启后彻底删除"); }
+     else if(a==="doupd"){ closeModal(); addPending(m.k,"更新 "+m.n+" → "+el.getAttribute("data-v")); toast("已下载并校验，加入待生效清单"); }
+   };
+ });
+}
+function closeModal(){ $("mbg").style.display="none"; }
+
+/* ---------- 待生效 / toast ---------- */
+function renderPending(){
+ var p=$("pend"), keys=Object.keys(S.pending);
+ if(!keys.length){ p.style.display="none"; return; }
+ p.style.display="flex";
+ var labels=keys.map(function(k){return S.pending[k];});
+ $("pendTx").textContent="待生效 "+labels.length+" 项（"+labels.join(" · ")+"）· 重启游戏后应用";
+}
+var toastTimer=null;
+function toast(msg){
+ var t=$("tst"); t.textContent=msg; t.style.display="block";
+ if(toastTimer) clearTimeout(toastTimer);
+ toastTimer=setTimeout(function(){ t.style.display="none"; },2200);
+}
+
+/* ---------- 总渲染 ---------- */
+function render(){
+ renderSide();
+ $("main").innerHTML = S.repoView ? repoHtml() : detailHtml(modOf(S.sel));
+ renderPending();
+ wireMain();
+}
+function wireMain(){
+ var main=$("main");
+ main.querySelectorAll("[data-act]").forEach(function(el){
+   el.onclick=function(){
+     var a=el.getAttribute("data-act");
+     if(a==="back"){ S.repoView=false; render(); }
+     else if(a==="chk"){ toast("已检查：2 个可更新 · 1 个可降级 · 1 个版本告警（告警不拦截，是否继续由你决定）"); }
+     else if(a==="upd"){
+       var g=el.getAttribute("data-g"), n=el.getAttribute("data-n");
+       if(g) openModal(updHtml(modOf(g)));
+       else { var mk=MODS.filter(function(m){return repoOf(m).n===n;})[0]; if(mk) openModal(updHtml(mk)); else { addPending("_inst"+n,"安装 "+n); toast("已下载并校验，加入待生效清单"); } }
+     }
+     else if(a==="inst"){ addPending("_inst"+el.getAttribute("data-n"),"安装 "+el.getAttribute("data-n")); toast("已下载并校验，加入待生效清单"); }
+     else if(a==="updall"){ REPO.forEach(function(r){ if(r.st==="upd"){ var mk=MODS.filter(function(m){return repoOf(m).n===r.n;})[0]; if(mk) S.pending[mk.k]="更新 "+r.n+" → "+r.rem; } }); render(); toast("已下载并校验，加入待生效清单"); }
+     else if(a==="reinst"){ var gg=el.getAttribute("data-g"); var mm=gg?modOf(gg):null; addPending(gg||"_r", "重装 "+(mm?mm.n:el.getAttribute("data-n"))); }
+     else if(a==="off"){ var m=modOf(el.getAttribute("data-g")); m.on=!m.on; render(); toast(m.on?"已启用":"已停用（重启级）"); }
+     else if(a==="del"){ openModal(delHtml(modOf(el.getAttribute("data-g")))); }
+   };
+ });
+ $("mbg").onclick=function(ev){ if(ev.target=== $("mbg")) closeModal(); };
+}
+$("pend").querySelectorAll("[data-x]").forEach(function(el){
+ el.onclick=function(){
+   if(el.getAttribute("data-x")==="undo"){ S.pending={}; render(); toast("已撤销全部待生效操作"); }
+   else toast("已请求重启：等待本进程退出后经 Steam 重拉（演示）");
+ };
+});
+
+render();
+})();
+</script>
+</div>
+</body>
+</html>
