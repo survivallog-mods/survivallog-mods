@@ -124,6 +124,17 @@ Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.EndlessGuard.dll"
 Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.PlanPick.dll"
 Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.PreDisasterSpeed.dll"
 Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.CabinetTagFilter.dll"
+; v1 旧清理器 MCCleaner.dll —— T16 单 dll 化后的**升级清理**：旧件必须移除，否则会与
+; ModCenter.dll 内的 CleanupRunner 重复执行（改名/排序各跑两遍）；取消勾选 mod_center 时也一并移除
+; （patchers 目录本身保留，不碰第三方 patcher）
+Type: files; Name: "{app}\BepInEx\patchers\MCCleaner.dll"
+; T16 引导壳 MCShell.dll（永久冻结，1.0.0 仅属性占位）：升级时先删旧再覆盖；
+; 只有壳接口签名变更才需要随安装器更新（壳本身不参与游戏内更新）
+Type: files; Name: "{app}\BepInEx\patchers\MCShell.dll"
+; T16 自更新预置/卸载墓碑（BepInEx\ModCenter 运行期记录）：安装器升级即替换本体，
+; 旧预置/墓碑必须作废（否则下次启动壳会按旧意图替换/删除刚装的新版）
+Type: files; Name: "{app}\BepInEx\ModCenter\selfupdate.flag"
+Type: files; Name: "{app}\BepInEx\ModCenter\uninstalled.flag"
 Type: files; Name: "{app}\BepInEx\config\quickaction.boot.ini"
 ; 旧独立筛选 mod 的 cfg（合并后插件已不存在，此 cfg 永久失效——清掉防误导；
 ; 其开关由储藏柜直达 cfg 的 [Filter] Enable 接管，默认 true=筛选重新开启）
@@ -193,6 +204,9 @@ Components: mod_quick; Source: "{#RelRoot}\SurvivalLog.QuickAction_v{#VerQuickAc
 Components: mod_quick; Source: "{#RelRoot}\SurvivalLog.QuickAction_v{#VerQuickAction}\README.md"; DestDir: "{app}\MOD说明"; DestName: "动作提速.md"; Flags: ignoreversion
 ; ---- MOD 管理中心（cfg 不预置：首跑按代码默认生成） ----
 Components: mod_center; Source: "{#RelRoot}\SurvivalLog.ModCenter_v{#VerModCenter}\BepInEx\plugins\SurvivalLog.ModCenter.dll"; DestDir: "{app}\BepInEx\plugins"; Flags: ignoreversion
+; v2/T16 生命周期引导壳：基座级永久冻结组件（壳内无清理逻辑；清理逻辑在 ModCenter.dll 内，
+; 游戏内更新 ModCenter 即更新清理逻辑）。安装器只在壳接口签名变更时需要更新它。
+Components: mod_center; Source: "{#RelRoot}\SurvivalLog.ModCenter_v{#VerModCenter}\BepInEx\patchers\MCShell.dll"; DestDir: "{app}\BepInEx\patchers"; Flags: ignoreversion
 Components: mod_center; Source: "{#RelRoot}\SurvivalLog.ModCenter_v{#VerModCenter}\README.md"; DestDir: "{app}\MOD说明"; DestName: "MOD管理中心.md"; Flags: ignoreversion
 ; ---- 无尽守卫（cfg 不预置：首跑按代码默认生成） ----
 Components: mod_endless; Source: "{#RelRoot}\SurvivalLog.EndlessGuard_v{#VerEndlessGuard}\BepInEx\plugins\SurvivalLog.EndlessGuard.dll"; DestDir: "{app}\BepInEx\plugins"; Flags: ignoreversion
