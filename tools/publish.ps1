@@ -1,4 +1,4 @@
-﻿# ============ 一键发版流水线（多仓编排版，2026-10-28 拆分迁移后）============
+# ============ 一键发版流水线（多仓编排版，2026-10-28 拆分迁移后）============
 # 用法：tools\publish.ps1 [-Yes] [-SkipTest] [-SkipGithub]
 #   -Yes        跳过交互确认
 #   -SkipTest   跳过安装器回归测试（不建议）
@@ -19,7 +19,7 @@ $tools   = $PSScriptRoot
 $relRoot = Join-Path $suite 'release'
 $ghExe   = Join-Path $tools 'gh\bin\gh.exe'
 $orgRepo = 'survivallog-mods/survivallog-mods'       # 中枢仓（套件 Release 仅说明，零资产）
-$suiteMods = @('BackpackExpand','CabinetSize','FridgeChill','QuickAction','CabinetEverywhere','CabinetBurden','RoleUnlock','RobotSpeed','ModCenter','EndlessGuard','PlanPick','PreDisasterSpeed')
+$suiteMods = @('BackpackExpand','CabinetSize','FridgeChill','QuickAction','CabinetEverywhere','CabinetBurden','UnlockHub','RobotSpeed','ModCenter','EndlessGuard','PlanPick','PreDisasterSpeed')
 
 # ---------- 1. 版本与更新说明一致性 + 确认 ----------
 $ver = (Get-Content (Join-Path $suite 'version.json') -Raw | ConvertFrom-Json).suite

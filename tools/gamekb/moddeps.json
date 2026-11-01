@@ -191,29 +191,14 @@
     ],
     "nativeSigs": []
   },
-  "FridgeChill": {
-    "harmony": [],
-    "configFields": [
+  "UnlockHub": {
+    "harmony": [
       {
-        "accessor": "_Config_Furniture_Dict",
-        "rowType": "Config_Furniture",
-        "fields": [
-          "ColdRate"
-        ]
+        "type": "GameCore.HotUpdate.ReduxUI.Reducer_Web_TradeUI",
+        "method": "ConsumeActiveShelfStock",
+        "params": 2
       }
     ],
-    "nativeSigs": [
-      {
-        "name": "TalentCapBytePatch",
-        "sigHex": "F30F5CD9F30F5FD3F30F59D0F30F1005????????F30F5FC2C3",
-        "rel32ByteOff": 16,
-        "expectOldSlot": 0.1,
-        "expectHits": 1
-      }
-    ]
-  },
-  "RoleUnlock": {
-    "harmony": [],
     "configFields": [
       {
         "accessor": "_Config_DefenseLv_Dict",
@@ -244,6 +229,27 @@
       }
     ],
     "nativeSigs": []
+  },
+  "FridgeChill": {
+    "harmony": [],
+    "configFields": [
+      {
+        "accessor": "_Config_Furniture_Dict",
+        "rowType": "Config_Furniture",
+        "fields": [
+          "ColdRate"
+        ]
+      }
+    ],
+    "nativeSigs": [
+      {
+        "name": "TalentCapBytePatch",
+        "sigHex": "F30F5CD9F30F5FD3F30F59D0F30F1005????????F30F5FC2C3",
+        "rel32ByteOff": 16,
+        "expectOldSlot": 0.1,
+        "expectHits": 1
+      }
+    ]
   },
   "PlanPick": {
     "harmony": [

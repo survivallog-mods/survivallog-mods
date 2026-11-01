@@ -11,7 +11,7 @@ $suite = Split-Path $PSScriptRoot -Parent          # ...\survivallog-mods\suite
 $root  = Split-Path $suite -Parent                 # ...\survivallog-mods (12 repo clones)
 $src   = Join-Path $suite 'ModShared'
 $mods  = @('BackpackExpand','CabinetSize','FridgeChill','QuickAction','CabinetEverywhere',
-           'CabinetBurden','RoleUnlock','RobotSpeed','ModCenter','EndlessGuard','PlanPick',
+           'CabinetBurden','UnlockHub','RobotSpeed','ModCenter','EndlessGuard','PlanPick',
            'PreDisasterSpeed')
 
 if (-not (Test-Path $src)) { throw ('ModShared source missing: ' + $src) }

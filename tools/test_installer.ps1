@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Stop'
 $projRoot = 'E:\Game\Mod\survivallog-mods\suite'
 # 版本号唯一来源：suite 根 version.json 的 suite 字段（仅作者定义，脚本只读）
 $ver = (Get-Content (Join-Path $projRoot 'version.json') -Raw | ConvertFrom-Json).suite
@@ -77,7 +77,7 @@ Check 'MOD说明\动作提速.md' $true
 Check 'BepInEx\plugins\SurvivalLog.CabinetExpand.dll' $false
 Check 'BepInEx\plugins\SurvivalLog.CabinetEverywhere.dll' $false
 Check 'BepInEx\plugins\SurvivalLog.CabinetBurden.dll' $false
-Check 'BepInEx\plugins\SurvivalLog.RoleUnlock.dll' $false
+Check 'BepInEx\plugins\SurvivalLog.UnlockHub.dll' $false
 Check 'BepInEx\plugins\SurvivalLog.FridgeExpand.dll' $false
 Check 'BepInEx\plugins\SurvivalLog.FridgeChill.dll' $false
 Check 'BepInEx\plugins\SurvivalLog.CabinetTagFilter.dll' $false

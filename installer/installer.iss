@@ -1,4 +1,4 @@
-﻿; 生存日志 MOD 安装器（Inno Setup 7）
+; 生存日志 MOD 安装器（Inno Setup 7）
 ; 基座必装（NextButtonClick 校验强制），12 个 MOD 自选（推荐类型默认勾选，可自由增减），至少选一个。
 ; 文件源全部指向 release\ 下的正式版本目录。
 
@@ -31,8 +31,8 @@
 #ifndef VerCabinetBurden
 #define VerCabinetBurden "1.7.0"
 #endif
-#ifndef VerRoleUnlock
-#define VerRoleUnlock "1.7.0"
+#ifndef VerUnlockHub
+#define VerUnlockHub "1.8.0"
 #endif
 #ifndef VerRobotSpeed
 #define VerRobotSpeed "1.7.0"
@@ -91,7 +91,7 @@ Name: "mod_cabinet"; Description: "柜子容量：家里全部柜子按 小/中/
 Name: "mod_chill"; Description: "冰箱保鲜：保鲜5倍→10倍"; Types: recommended full custom
 Name: "mod_cabaccess"; Description: "储藏柜直达（直达+智能视图+筛选）：储物柜/橱柜/金属柜进工作台/无人机交易/烹饪等界面，制作自动取料；按界面场景视图（食物/材料）自动收窄页签，或下拉按标签筛选柜子页签（原「柜子标签筛选」mod 已并入本组件）"; Types: recommended full custom
 Name: "mod_cabburden"; Description: "柜子负重解放：全部储物家具（柜子/篮子/储物柜/货车厢/无人机舱等10种）负重无限制，格子没满就能继续放；默认不碰购物车/轿车（可调）"; Types: recommended full custom
-Name: "mod_roleunlock"; Description: "角色专属解锁：藤蔓种子全角色可发现（含种植/护盾），燃烧瓶等防御配方四角色互通（各自防御等级门槛照旧）"; Types: recommended full custom
+Name: "mod_unlockhub"; Description: "解锁中心：角色专属内容全解锁（藤蔓种子/防御配方/规划/花瓶）+ 交易解锁（无人机货架买完即刷新上架）；关闭即还原官方门槛"; Types: recommended full custom
 Name: "mod_robotspeed"; Description: "机器人提速：修理/整理/种植机器人不再比手动慢（动作对齐手速+移速/充电/续航翻倍+三台货舱扩容；不含插槽与模块）"; Types: recommended full custom
 Name: "mod_quick"; Description: "动作提速：按游戏官方分类统一提速，周期结算收益的动作自动保护"; Types: recommended full custom
 Name: "mod_quick\qa_item"; Description: "物品使用：吃/喝/品尝/吞咽/药品 → 0.5秒（约2750条）"; Types: recommended full custom
@@ -117,6 +117,7 @@ Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.FridgeChill.dll"
 Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.QuickAction.dll"
 Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.CabinetEverywhere.dll"
 Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.CabinetBurden.dll"
+Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.UnlockHub.dll"
 Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.RoleUnlock.dll"
 Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.RobotSpeed.dll"
 Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.ModCenter.dll"
@@ -147,7 +148,9 @@ Type: files; Name: "{app}\MOD说明\冰箱保鲜.md"
 Type: files; Name: "{app}\MOD说明\动作提速.md"
 Type: files; Name: "{app}\MOD说明\储藏柜直达.md"
 Type: files; Name: "{app}\MOD说明\柜子负重解放.md"
+Type: files; Name: "{app}\MOD说明\解锁中心.md"
 Type: files; Name: "{app}\MOD说明\角色专属解锁.md"
+Type: files; Name: "{app}\BepInEx\config\com.local.survivallog.roleunlock.cfg"
 Type: files; Name: "{app}\MOD说明\机器人提速.md"
 Type: files; Name: "{app}\MOD说明\MOD管理中心.md"
 Type: files; Name: "{app}\MOD说明\无尽守卫.md"
@@ -191,10 +194,10 @@ Components: mod_cabaccess; Source: "{#RelRoot}\SurvivalLog.CabinetEverywhere_v{#
 Components: mod_cabburden; Source: "{#RelRoot}\SurvivalLog.CabinetBurden_v{#VerCabinetBurden}\BepInEx\plugins\SurvivalLog.CabinetBurden.dll"; DestDir: "{app}\BepInEx\plugins"; Flags: ignoreversion
 Components: mod_cabburden; Source: "{#RelRoot}\SurvivalLog.CabinetBurden_v{#VerCabinetBurden}\BepInEx\config\com.local.survivallog.cabinetburden.cfg"; DestDir: "{app}\BepInEx\config"; Flags: onlyifdoesntexist
 Components: mod_cabburden; Source: "{#RelRoot}\SurvivalLog.CabinetBurden_v{#VerCabinetBurden}\README.md"; DestDir: "{app}\MOD说明"; DestName: "柜子负重解放.md"; Flags: ignoreversion
-; ---- 角色专属解锁 ----
-Components: mod_roleunlock; Source: "{#RelRoot}\SurvivalLog.RoleUnlock_v{#VerRoleUnlock}\BepInEx\plugins\SurvivalLog.RoleUnlock.dll"; DestDir: "{app}\BepInEx\plugins"; Flags: ignoreversion
-Components: mod_roleunlock; Source: "{#RelRoot}\SurvivalLog.RoleUnlock_v{#VerRoleUnlock}\BepInEx\config\com.local.survivallog.roleunlock.cfg"; DestDir: "{app}\BepInEx\config"; Flags: onlyifdoesntexist
-Components: mod_roleunlock; Source: "{#RelRoot}\SurvivalLog.RoleUnlock_v{#VerRoleUnlock}\README.md"; DestDir: "{app}\MOD说明"; DestName: "角色专属解锁.md"; Flags: ignoreversion
+; ---- 解锁中心（原角色专属解锁，v1.8.0 更名）----
+Components: mod_unlockhub; Source: "{#RelRoot}\SurvivalLog.UnlockHub_v{#VerUnlockHub}\BepInEx\plugins\SurvivalLog.UnlockHub.dll"; DestDir: "{app}\BepInEx\plugins"; Flags: ignoreversion
+Components: mod_unlockhub; Source: "{#RelRoot}\SurvivalLog.UnlockHub_v{#VerUnlockHub}\BepInEx\config\com.local.survivallog.unlockhub.cfg"; DestDir: "{app}\BepInEx\config"; Flags: onlyifdoesntexist
+Components: mod_unlockhub; Source: "{#RelRoot}\SurvivalLog.UnlockHub_v{#VerUnlockHub}\README.md"; DestDir: "{app}\MOD说明"; DestName: "解锁中心.md"; Flags: ignoreversion
 ; ---- 机器人提速（cfg 不预置：首跑按代码默认生成完整中文注释配置） ----
 Components: mod_robotspeed; Source: "{#RelRoot}\SurvivalLog.RobotSpeed_v{#VerRobotSpeed}\BepInEx\plugins\SurvivalLog.RobotSpeed.dll"; DestDir: "{app}\BepInEx\plugins"; Flags: ignoreversion
 Components: mod_robotspeed; Source: "{#RelRoot}\SurvivalLog.RobotSpeed_v{#VerRobotSpeed}\README.md"; DestDir: "{app}\MOD说明"; DestName: "机器人提速.md"; Flags: ignoreversion
@@ -471,7 +474,7 @@ begin
             WizardIsComponentSelected('mod_chill') or
             WizardIsComponentSelected('mod_cabaccess') or
             WizardIsComponentSelected('mod_cabburden') or
-            WizardIsComponentSelected('mod_roleunlock') or
+            WizardIsComponentSelected('mod_unlockhub') or
             WizardIsComponentSelected('mod_quick') or
             WizardIsComponentSelected('mod_robotspeed') or
             WizardIsComponentSelected('mod_center') or

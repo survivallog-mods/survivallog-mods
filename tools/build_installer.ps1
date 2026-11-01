@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Stop'
 $suite = Split-Path $PSScriptRoot -Parent          # <root>\suite（中枢仓 clone）
 $root  = Split-Path $suite -Parent                 # <root>\（12 mod 仓 clone 所在父夹）
 # 版本号来源（2026-10-28 多仓化）：SuiteVer = suite 根 version.json（作者定义）；
@@ -11,7 +11,7 @@ if (-not (Test-Path $iscc)) { throw ('ISCC 不存在: ' + $iscc) }
 Write-Host ('编译安装器 v' + $ver + ' ...')
 # per-mod 版本 define（mod 包目录名 = mod 自身版本；Base 用 SuiteVer）
 $defines = @('/DSuiteVer=' + $ver)
-$mods = @('BackpackExpand','CabinetSize','FridgeChill','QuickAction','CabinetEverywhere','CabinetBurden','RoleUnlock','RobotSpeed','ModCenter','EndlessGuard','PlanPick','PreDisasterSpeed')
+$mods = @('BackpackExpand','CabinetSize','FridgeChill','QuickAction','CabinetEverywhere','CabinetBurden','UnlockHub','RobotSpeed','ModCenter','EndlessGuard','PlanPick','PreDisasterSpeed')
 foreach ($m in $mods) {
     $csproj = Join-Path $root ($m + '\SurvivalLog.' + $m + '\SurvivalLog.' + $m + '.csproj')
     if (-not (Test-Path $csproj)) { throw ('csproj 缺失: ' + $csproj) }
