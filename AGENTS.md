@@ -19,15 +19,15 @@
 12. **实证优先**：不猜先查（反汇编/读源码/运行时探针），方案确认后再动手，最小侵入。
 13. **外部工具装卸可能拆注入链**（2026-10-24 xmod 卸载实锤拆了 winhttp/dotnet/BepInEx core，见 docs/03 环境事故节）：任何 xmod/修改器/loader 安装或卸载后、以及"mod 全部失效"时，先验三件套——根目录 `winhttp.dll`+`doorstop_config.ini`、`dotnet\` 有货、`BepInEx\core` 有 dll；被拆即重跑套件安装器（勿 /SILENT）。
 14. **N网通道确认门**：向 Nexus Mods 推送发版前必须经作者显式触发/确认（publish.ps1 出完 GitHub Release 后不得自动推 N网）；API key 本地单源 `tools/secrets/`（gitignore 已锚定）绝不入库。详见 `docs/08`。
-15. **中枢+子项目模型（2026-10-28 v2 迁移后）**：父夹 `E:\Game\Mod\survivallog-mods\`（非 git 仓）下，**12 个 mod 仓 = 开发主场**（组织 `survivallog-mods` 各自独立仓，本地 clone 于父夹 `\<Mod>`，各仓自带 `release.ps1` 单发流水线）；**suite = 中枢**（安装器/Base/工具链/文档/ModShared/探针与存档 mod）。探针三件（ActionProbe/ConfigDumpProbe/ViewportProbe）、StackLimit999、CabinetExpand **只在 suite 存档，绝不发 Release、绝不进安装器**；`gamekb/`、`tools/secrets/`、`发版物料/` **永不入库**；**ModShared 唯一改动源 = suite\ModShared**（`tools\push_modshared.ps1` 单向下行推送 12 仓，镜像内副本是生成物勿手改）。N网推送永远另走确认门（规则 14）。
+15. **中枢+子项目模型（2026-10-28 v2 迁移后；2026-11-03 起 13 仓）**：父夹 `E:\Game\Mod\survivallog-mods\`（非 git 仓）下，**13 个 mod 仓 = 开发主场**（组织 `survivallog-mods` 各自独立仓，本地 clone 于父夹 `\<Mod>`，各仓自带 `release.ps1` 单发流水线）；**suite = 中枢**（安装器/Base/工具链/文档/ModShared/探针与存档 mod）。探针三件（ActionProbe/ConfigDumpProbe/ViewportProbe）、StackLimit999、CabinetExpand **只在 suite 存档，绝不发 Release、绝不进安装器**；`gamekb/`、`tools/secrets/`、`发版物料/` **永不入库**；**ModShared 唯一改动源 = suite\ModShared**（`tools\push_modshared.ps1` 单向下行推送 13 仓，镜像内副本是生成物勿手改）。N网推送永远另走确认门（规则 14）。
 
 ## 二、环境与路径（本机开发环境）
 
 | 项 | 路径 |
 |---|---|
-| 父项目夹 | `E:\Game\Mod\survivallog-mods\`（非 git 仓；下含 suite、12 个 mod 仓 clone 与共享目录） |
+| 父项目夹 | `E:\Game\Mod\survivallog-mods\`（非 git 仓；下含 suite、13 个 mod 仓 clone 与共享目录） |
 | suite\（中枢仓） | `E:\Game\Mod\survivallog-mods\suite`（origin=survivallog-mods/survivallog-mods；工具链/安装器/文档/发版物料、ModShared 唯一权威、探针与存档 mod） |
-| 12 个 mod 仓 | `E:\Game\Mod\survivallog-mods\<Mod>\`（各自 git 仓=组织仓=开发主场，仓内 `release.ps1` 单发流水线；`SurvivalLog.<Mod>\` 为工程目录） |
+| 13 个 mod 仓 | `E:\Game\Mod\survivallog-mods\<Mod>\`（各自 git 仓=组织仓=开发主场，仓内 `release.ps1` 单发流水线；`SurvivalLog.<Mod>\` 为工程目录） |
 | 父夹级共享目录 | `gamekb\`（游戏资料库，本地 only 永不入库）、`sdk\dotnet\`（便携 .NET SDK，构建依赖）、`thirdparty\`（第三方 N 网 mod 本地参考，禁转载）、`发版物料\`（本地） |
 | 游戏本体 | `E:\SteamLibrary\steamapps\common\Survival Log`（AppID 4164790，Unity 6000.2.7f2，IL2CPP，Steam 注册表 HKCU:\SOFTWARE\Valve\Steam → libraryfolders.vdf 定位） |
 | 存档 | `C:\Users\<user>\AppData\LocalLow\LLS\SLGame\Saves\` |
@@ -44,10 +44,10 @@
 # 单 mod 发版（各仓仓内；版本号=该仓 csproj <Version>，作者定义）
 powershell -File "E:\Game\Mod\survivallog-mods\<Mod>\release.ps1"
 
-# ModShared 下行同步（唯一改动源=suite\ModShared → 12 仓；幂等，有差异才提交推送）
+# ModShared 下行同步（唯一改动源=suite\ModShared → 13 仓；幂等，有差异才提交推送）
 powershell -File "E:\Game\Mod\survivallog-mods\suite\tools\push_modshared.ps1"
 
-# 套件发版（作者在 suite version.json 定套件号 + CHANGELOG 补节后；编排 12 仓 -PackageOnly）
+# 套件发版（作者在 suite version.json 定套件号 + CHANGELOG 补节后；编排 13 仓——钉版仓复用已发 zip，其余 -PackageOnly）
 powershell -File "E:\Game\Mod\survivallog-mods\suite\tools\publish.ps1"
 
 # 游戏更新后一键同步（快照+diff+兼容核对+[-AutoProbe]启动采表；快照落父夹 gamekb\）
@@ -72,7 +72,7 @@ node "E:/Game/Mod/survivallog-mods/suite/tools/gamekb/sigscan.js" "E:/SteamLibra
 
 **发版**（docs/05，两条线）：
 - **单 mod 线**（常用）：改码→commit→该仓 `CHANGELOG.md` 补节→该仓 csproj `<Version>` 改号（作者）→ 仓内 `.\release.ps1`（闸门=本仓干净树仅放行 CHANGELOG 脏改动；构建→打包+cfg 归一→update.json→tag `v<版本>`+Release 双资产；`-PackageOnly` 供套件编排）。
-- **套件线**：作者在 suite `version.json` 定套件号（各 mod 版本以各仓 csproj 为权威）→ CHANGELOG 补该版小节 → `tools\publish.ps1`（拉取 12 仓→逐仓 `release.ps1 -PackageOnly`→Base→安装器→回归→网盘组装→中枢仓 tag `v<套件号>`+GitHub Release 仅说明）。
+- **套件线**：作者在 suite `version.json` 定套件号（各 mod 版本以各仓 csproj 为权威；`version.json` `pins` 可把个别 mod 钉在已发版号上，发版复用该仓已发 zip 不重建）→ CHANGELOG 补该版小节 → `tools\publish.ps1`（拉取 13 仓→钉版仓复用已发 zip / 其余逐仓 `release.ps1 -PackageOnly`→Base→安装器→回归→网盘组装→中枢仓 tag `v<套件号>`+GitHub Release 仅说明）。
 N网通道在任一线发完之后另走 docs/08 确认门：**必须作者显式触发/确认才推送**。
 
 ## 五、文档地图

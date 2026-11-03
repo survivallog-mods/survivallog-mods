@@ -1,6 +1,6 @@
-# ============ Push ModShared from suite to the 12 mod repos ============
+# ============ Push ModShared from suite to the 13 mod repos ============
 # Usage: powershell -NoProfile -ExecutionPolicy Bypass -File tools\push_modshared.ps1
-# Authority: <suite>\ModShared (the central copy). For each of the 12 mod repos that
+# Authority: <suite>\ModShared (the central copy). For each of the 13 mod repos that
 # live as sibling folders of the suite clone, mirror ModShared into the repo with
 # robocopy /MIR (excluding .git), and only when contents actually changed:
 #   git add ModShared && git commit -m "sync ModShared from suite" && git push
@@ -8,11 +8,10 @@
 # ASCII-only on purpose (PS 5.1 reads BOM-less UTF-8 scripts as ANSI).
 $ErrorActionPreference = 'Stop'
 $suite = Split-Path $PSScriptRoot -Parent          # ...\survivallog-mods\suite
-$root  = Split-Path $suite -Parent                 # ...\survivallog-mods (12 repo clones)
+$root  = Split-Path $suite -Parent                 # ...\survivallog-mods (13 repo clones)
 $src   = Join-Path $suite 'ModShared'
-$mods  = @('BackpackExpand','CabinetSize','FridgeChill','QuickAction','CabinetEverywhere',
-           'CabinetBurden','UnlockHub','RobotSpeed','ModCenter','EndlessGuard','PlanPick',
-           'PreDisasterSpeed')
+. (Join-Path $PSScriptRoot 'get_mod_versions.ps1') # shared 13-mod list (single source)
+$mods  = Get-SuiteModList
 
 if (-not (Test-Path $src)) { throw ('ModShared source missing: ' + $src) }
 

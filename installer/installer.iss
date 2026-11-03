@@ -1,5 +1,5 @@
 ; 生存日志 MOD 安装器（Inno Setup 7）
-; 基座必装（NextButtonClick 校验强制），12 个 MOD 自选（推荐类型默认勾选，可自由增减），至少选一个。
+; 基座必装（NextButtonClick 校验强制），13 个 MOD 自选（推荐类型默认勾选，可自由增减），至少选一个。
 ; 文件源全部指向 release\ 下的正式版本目录。
 
 #define MyAppName "生存日志 MOD"
@@ -48,6 +48,9 @@
 #endif
 #ifndef VerPreDisasterSpeed
 #define VerPreDisasterSpeed "1.7.0"
+#endif
+#ifndef VerSaveMgr
+#define VerSaveMgr "1.0.2"
 #endif
 ; 作者署名/防盗引流（2026-10-14）：每页底部署名条（TNewStaticText）+ 欢迎页二维码名片，均点击直达作者抖音主页
 #define DouyinUrl "https://v.douyin.com/z99n5ZQfkyw/"
@@ -103,6 +106,7 @@ Name: "mod_center"; Description: "MOD 管理中心：主菜单与游戏内 ESC �
 Name: "mod_endless"; Description: "无尽守卫（囤鼠桃园）：无尽模式新沦陷全拦+已沦陷交易点/探险图读档复活+倒计时清空，另加 11 条后期拾遗规划（超市/医院/学校，D100 起）防野外资源枯竭"; Types: recommended full custom
 Name: "mod_planpick"; Description: "自选规划：生存规划三选一页加「自选规划」入口，全部规划可搜可买（非今日候选默认两倍价可调），告别等不到想要的三张"; Types: recommended full custom
 Name: "mod_predisaster"; Description: "灾前加速：把官方灾后五键倍速条（暂停/慢速/原速/二倍/三倍）搬到灾前，按钮+快捷键(~1234)变速，走游戏自带换档通道"; Types: recommended full custom
+Name: "mod_savemgr"; Description: "存档管理：每日结算自动存档（间隔可设）+局内暂停菜单立即存档；存档点与官方存档同列同名，读取即回档成新档（原档不动），崩溃/强退不丢进度"; Types: recommended full custom
 
 [InstallDelete]
 ; 安装前预清理：先移除本项目全部插件（无论本次是否勾选），再安装所选组件——
@@ -125,6 +129,7 @@ Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.EndlessGuard.dll"
 Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.PlanPick.dll"
 Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.PreDisasterSpeed.dll"
 Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.CabinetTagFilter.dll"
+Type: files; Name: "{app}\BepInEx\plugins\SurvivalLog.SaveMgr.dll"
 ; v1 旧清理器 MCCleaner.dll —— T16 单 dll 化后的**升级清理**：旧件必须移除，否则会与
 ; ModCenter.dll 内的 CleanupRunner 重复执行（改名/排序各跑两遍）；取消勾选 mod_center 时也一并移除
 ; （patchers 目录本身保留，不碰第三方 patcher）
@@ -220,6 +225,9 @@ Components: mod_planpick; Source: "{#RelRoot}\SurvivalLog.PlanPick_v{#VerPlanPic
 ; ---- 灾前加速（cfg 不预置：首跑按代码默认生成） ----
 Components: mod_predisaster; Source: "{#RelRoot}\SurvivalLog.PreDisasterSpeed_v{#VerPreDisasterSpeed}\BepInEx\plugins\SurvivalLog.PreDisasterSpeed.dll"; DestDir: "{app}\BepInEx\plugins"; Flags: ignoreversion
 Components: mod_predisaster; Source: "{#RelRoot}\SurvivalLog.PreDisasterSpeed_v{#VerPreDisasterSpeed}\README.md"; DestDir: "{app}\MOD说明"; DestName: "灾前加速.md"; Flags: ignoreversion
+; ---- 存档管理（cfg 不预置：首跑按代码默认生成；备份数据在 plugins-data，卸载不删） ----
+Components: mod_savemgr; Source: "{#RelRoot}\SurvivalLog.SaveMgr_v{#VerSaveMgr}\BepInEx\plugins\SurvivalLog.SaveMgr.dll"; DestDir: "{app}\BepInEx\plugins"; Flags: ignoreversion
+Components: mod_savemgr; Source: "{#RelRoot}\SurvivalLog.SaveMgr_v{#VerSaveMgr}\README.md"; DestDir: "{app}\MOD说明"; DestName: "存档管理.md"; Flags: ignoreversion
 
 ; 抖音名片（仅向导期署名展示用，dontcopy 不落地安装目录）
 Source: "assets\douyin_night_card.bmp"; DestDir: "{tmp}"; Flags: dontcopy
@@ -480,7 +488,8 @@ begin
             WizardIsComponentSelected('mod_center') or
             WizardIsComponentSelected('mod_endless') or
             WizardIsComponentSelected('mod_planpick') or
-            WizardIsComponentSelected('mod_predisaster')) then
+            WizardIsComponentSelected('mod_predisaster') or
+            WizardIsComponentSelected('mod_savemgr')) then
     begin
       MsgBox('基座之外至少需要选择一个 MOD（也可以全选）。', mbError, MB_OK);
       Result := False;

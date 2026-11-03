@@ -11,7 +11,7 @@
      里面能看到 SurvivalLog.exe 的那一层）
   2. 安装界面上勾选想要的 MOD：
      · "MOD 框架基座"必装且不可取消
-     · 本套件 12 个 MOD 默认勾选，可自由增减，至少选一个
+     · 本套件 13 个 MOD 默认勾选，可自由增减，至少选一个
   3. 点"安装"等进度条走完即可，完成页可勾选直接启动游戏
 
   增删 MOD：重新运行安装器再选一遍即可（已调好的配置会保留）
@@ -29,18 +29,19 @@
   第一步（必装，只装一次）：
     SurvivalLog.Base_v{V}.zip —— MOD 框架基座
   第二步（自选，想要哪个解压哪个，可任意组合）：
-    SurvivalLog.BackpackExpand_v{V}.zip  背包扩容
-    SurvivalLog.CabinetSize_v{V}.zip    柜子容量
-    SurvivalLog.FridgeChill_v{V}.zip     冰箱保鲜
-    SurvivalLog.QuickAction_v{V}.zip     动作提速
-    SurvivalLog.CabinetEverywhere_v{V}.zip 储藏柜直达（含场景视图/标签筛选）
-    SurvivalLog.CabinetBurden_v{V}.zip  柜子负重解放
-    SurvivalLog.RoleUnlock_v{V}.zip     角色专属解锁
-    SurvivalLog.RobotSpeed_v{V}.zip     机器人提速
-    SurvivalLog.ModCenter_v{V}.zip      MOD 管理中心
-    SurvivalLog.EndlessGuard_v{V}.zip   无尽守卫（囤鼠桃园）
-    SurvivalLog.PlanPick_v{V}.zip       自选规划
-    SurvivalLog.PreDisasterSpeed_v{V}.zip 灾前加速
+    SurvivalLog.BackpackExpand_v{V_BackpackExpand}.zip  背包扩容
+    SurvivalLog.CabinetSize_v{V_CabinetSize}.zip    柜子容量
+    SurvivalLog.FridgeChill_v{V_FridgeChill}.zip     冰箱保鲜
+    SurvivalLog.QuickAction_v{V_QuickAction}.zip     动作提速
+    SurvivalLog.CabinetEverywhere_v{V_CabinetEverywhere}.zip 储藏柜直达（含场景视图/标签筛选）
+    SurvivalLog.CabinetBurden_v{V_CabinetBurden}.zip  柜子负重解放
+    SurvivalLog.UnlockHub_v{V_UnlockHub}.zip     解锁中心（原"角色专属解锁"更名升级）
+    SurvivalLog.RobotSpeed_v{V_RobotSpeed}.zip     机器人提速
+    SurvivalLog.ModCenter_v{V_ModCenter}.zip      MOD 管理中心
+    SurvivalLog.EndlessGuard_v{V_EndlessGuard}.zip   无尽守卫（囤鼠桃园）
+    SurvivalLog.PlanPick_v{V_PlanPick}.zip       自选规划
+    SurvivalLog.PreDisasterSpeed_v{V_PreDisasterSpeed}.zip 灾前加速
+    SurvivalLog.SaveMgr_v{V_SaveMgr}.zip       存档管理
 
   解压方法：每个包的全部内容直接解压到游戏目录
   （提示合并/覆盖选"是"），装完 Base 再装选中的 MOD 包。
@@ -68,15 +69,19 @@
   柜子负重解放：全部储物家具（原生柜子/篮子/储物柜/货车车厢/无人机
             货舱/门口暂存格/窗台收纳/中控台货舱共 10 种）负重**无限制**，
             格子没满就能继续放；默认不碰购物车/轿车（可调）
-  角色专属解锁：藤蔓种子全角色可发现（含种植/护盾），
-            燃烧瓶等防御配方四角色互通（防御等级门槛照旧）
+  解锁中心（原"角色专属解锁"更名升级）：藤蔓种子/花种子全角色
+            可发现（含种植/护盾/插瓶），生存规划与防御配方四角色
+            互通，花瓶配方全角色可学；新增交易解锁——无人机交易
+            买完后该货架下次打开自动满量上新（休闲模式稀有货架
+            不受影响）
   机器人提速：修理/整理/种植机器人全面提速——动作不再比手动慢，
             移速/充电/续航翻倍、耗电减半，三台货舱全部翻倍
             （每项倍率可改；机器人模块加成不受影响；
             不含插槽与模块修改）
   MOD 管理中心：主菜单和游戏内 ESC 各一个「MOD 管理」入口，
             面板里集中开关/调参全套件 mod（滑条改完几秒生效），
-            第三方 mod 也有通用页；只是管理器，不改玩法
+            第三方 mod 也有通用页；游戏内还可一键更新/彻底卸载/
+            手动加载排序/冲突体检；只是管理器，不改玩法
   无尽守卫（囤鼠桃园）：无尽模式新沦陷全拦 + 已沦陷交易点/探险图
             读档复活 + 倒计时清空；另加 11 条后期拾遗规划
             （超市拾遗·六~十/医院踏勘·三~五/学校摸排·三~五，
@@ -88,6 +93,9 @@
   灾前加速：把官方灾后的五键倍速条（暂停/慢速/原速/二倍/三倍）
             搬到灾前界面，按钮+快捷键(~ 1 2 3 4)都能变速，
             走游戏自带换档通道
+  存档管理：每日结算自动存档（间隔天数可设）+ 局内暂停菜单
+            「立即存档」；存档点与官方存档同列同名，读取即回档
+            成新档、原档不动；崩溃/强退进度不丢
   （原独立 mod"柜子标签筛选"已并入"储藏柜直达"：曾手动关闭过
     筛选的用户，合并后筛选默认重新开启，可在配置 Filter 区关闭）
 
@@ -100,6 +108,7 @@
   · 装了无尽守卫：地图上已沦陷的交易点读档后恢复；规划列表出现"超市拾遗·六"起的新条目
   · 装了自选规划：每日规划三选一页页脚出现「自选规划」入口
   · 装了灾前加速：灾前界面出现五键倍速条
+  · 装了存档管理：局内 ESC 暂停菜单出现「立即存档」按钮
   · 通用：游戏目录 BepInEx\LogOutput.log 里能看到已装插件
 
 【调整数值】

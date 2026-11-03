@@ -1,11 +1,11 @@
-# ============ 一键发版流水线（多仓编排版，2026-10-28 拆分迁移后）============
+﻿# ============ 一键发版流水线（多仓编排版，2026-10-28 拆分迁移后）============
 # 用法：tools\publish.ps1 [-Yes] [-SkipTest] [-SkipGithub]
 #   -Yes        跳过交互确认
 #   -SkipTest   跳过安装器回归测试（不建议）
 #   -SkipGithub 跳过 git 提交/tag/GitHub Release
 # 版本号来源：suite 根 version.json 的 suite 字段（安装器/中枢仓 tag 线，作者定义）；
-#   各 mod 版本以各仓 csproj <Version> 为权威（pull 后读取）。
-# 布局：本脚本在 <root>\suite\tools\；12 个 mod 仓 clone 在 <root>\<Mod>\（各仓自带 release.ps1）。
+#   各 mod 版本以各仓 csproj <Version> 为权威（pull 后读取）；version.json pins 钉版的 mod 复用已发 zip。
+# 布局：本脚本在 <root>\suite\tools\；13 个 mod 仓 clone 在 <root>\<Mod>\（各仓自带 release.ps1）。
 # CHANGELOG.md 必须已有该版说明。
 param(
     [switch]$Yes,
@@ -19,24 +19,28 @@ $tools   = $PSScriptRoot
 $relRoot = Join-Path $suite 'release'
 $ghExe   = Join-Path $tools 'gh\bin\gh.exe'
 $orgRepo = 'survivallog-mods/survivallog-mods'       # 中枢仓（套件 Release 仅说明，零资产）
-$suiteMods = @('BackpackExpand','CabinetSize','FridgeChill','QuickAction','CabinetEverywhere','CabinetBurden','UnlockHub','RobotSpeed','ModCenter','EndlessGuard','PlanPick','PreDisasterSpeed')
+. (Join-Path $tools 'get_mod_versions.ps1')          # 共享：13 mod 清单 + 钉版/版本解析（单一来源）
+$suiteMods = Get-SuiteModList
+$pins     = Get-SuitePins $suite                     # 作者钉版表（version.json pins）：钉版=复用已发 zip 不重建
 
 # ---------- 1. 版本与更新说明一致性 + 确认 ----------
 $ver = (Get-Content (Join-Path $suite 'version.json') -Raw | ConvertFrom-Json).suite
 if (-not $ver) { throw 'version.json 缺少 suite 字段' }
-Write-Host ('=== 发版 v' + $ver + '（多仓编排：12 mod 仓 + Base + 安装器）===')
+Write-Host ('=== 发版 v' + $ver + '（多仓编排：13 mod 仓 + Base + 安装器）===')
 $logPath = Join-Path $suite 'CHANGELOG.md'
 $logTxt  = [System.IO.File]::ReadAllText($logPath)
 if ($logTxt -notmatch (('##\s*v' + [regex]::Escape($ver)) + '\b')) {
     throw ('CHANGELOG.md 没有 v' + $ver + ' 的小节：先补该版更新说明再发版。')
 }
 if (-not $Yes) {
-    $a = Read-Host ('确认发版 v' + $ver + '？（拉取 12 仓、重建 zip/安装器，覆盖同名产物）[Y/N]')
+    $a = Read-Host ('确认发版 v' + $ver + '？（收包 13 仓、重建 zip/安装器，覆盖同名产物）[Y/N]')
     if ($a -notmatch '^[Yy]') { throw '已取消' }
 }
 
-# ---------- 2. 12 mod 仓：pull → 读 csproj 版本 → 各仓 release.ps1 -PackageOnly → 收 zip ----------
-# 各仓 release.ps1 自含构建与 csproj/Plugin.cs 版本一致性闸门；-PackageOnly 只打包不 tag。
+# ---------- 2. 13 mod 仓：钉版复用已发 zip 或 pull → 读 csproj 版本 → release.ps1 -PackageOnly → 收 zip ----------
+# 钉版（version.json pins）mod：不 pull、不过闸门、不重打包——直接复用该仓 release\ 已发的该版 zip，
+#   与当初 GitHub Release 资产逐字节一致；仓内未提交/WIP 改动完全不动（如作者正在改的下版本）。
+# 非钉版 mod：各仓 release.ps1 自含构建与 csproj/Plugin.cs 版本一致性闸门；-PackageOnly 只打包不 tag。
 # 注意：必须以子进程 powershell -File 调用（各仓脚本 PackageOnly 路径 exit 0，dot-source 会终止本流水线）。
 # release\ 必须先以目录存在——Copy-Item 到不存在的目录路径会把 zip 落成名为 release 的文件（实测踩坑）
 if (Test-Path $relRoot -PathType Leaf) { throw ($relRoot + ' 是文件而非目录（历史事故残留），先手工删除再发版') }
@@ -46,39 +50,49 @@ foreach ($m in $suiteMods) {
     Write-Host ('--- ' + $m + ' ---')
     $repo = Join-Path $root $m
     if (-not (Test-Path (Join-Path $repo '.git'))) { throw ('mod 仓 clone 不存在: ' + $repo) }
-    git -C $repo pull --ff-only
-    if ($LASTEXITCODE -ne 0) { throw ('git pull --ff-only 失败: ' + $m + '（先处理本地/远端分叉再发版）') }
 
-    $csproj = Join-Path $repo ('SurvivalLog.' + $m + '\SurvivalLog.' + $m + '.csproj')
-    if (-not (Test-Path $csproj)) { throw ('csproj 缺失: ' + $csproj) }
-    $t = [System.IO.File]::ReadAllText($csproj)
-    $mv = [regex]::Match($t, '<Version>([\d.]+)</Version>').Groups[1].Value
-    if (-not $mv) { throw ('无法读取 csproj <Version>: ' + $csproj) }
-    $mvers[$m] = $mv
+    $pin = $pins.$m
+    if ($pin) {
+        $zip = Join-Path $repo ('release\SurvivalLog.' + $m + '_v' + $pin + '.zip')
+        if (-not (Test-Path $zip)) { throw ($m + ' 钉版 v' + $pin + ' 的历史 zip 缺失: ' + $zip + '（重跑该仓 release.ps1 -PackageOnly 或核对 pins）') }
+        $mvers[$m] = $pin
+    } else {
+        git -C $repo pull --ff-only
+        if ($LASTEXITCODE -ne 0) { throw ('git pull --ff-only 失败: ' + $m + '（先处理本地/远端分叉再发版）') }
 
-    # 防盗署名气泡接线校验（套件规范，见 docs\00 与 ModShared\README.md；源在各仓 clone 内）
-    if ($t -notmatch 'ModShared[\\/]WelcomeTip\.cs') {
-        throw ($m + ' 的 csproj 未链入 ModShared\WelcomeTip.cs（防盗署名气泡为套件规范）')
+        $csproj = Join-Path $repo ('SurvivalLog.' + $m + '\SurvivalLog.' + $m + '.csproj')
+        if (-not (Test-Path $csproj)) { throw ('csproj 缺失: ' + $csproj) }
+        $t = [System.IO.File]::ReadAllText($csproj)
+        $mv = [regex]::Match($t, '<Version>([\d.]+)</Version>').Groups[1].Value
+        if (-not $mv) { throw ('无法读取 csproj <Version>: ' + $csproj) }
+        $mvers[$m] = $mv
+
+        # 防盗署名气泡接线校验（套件规范，见 docs\00 与 ModShared\README.md；源在各仓 clone 内）
+        if ($t -notmatch 'ModShared[\\/]WelcomeTip\.cs') {
+            throw ($m + ' 的 csproj 未链入 ModShared\WelcomeTip.cs（防盗署名气泡为套件规范）')
+        }
+        $plug = Get-ChildItem (Join-Path $repo ('SurvivalLog.' + $m)) -Filter '*Plugin.cs' | Select-Object -First 1
+        if ($plug -and (([System.IO.File]::ReadAllText($plug.FullName)) -notmatch 'WelcomeTip\.Install')) {
+            throw ($plug.Name + ' 缺少 WelcomeTip.Install(Log) 调用（防盗署名气泡为套件规范）')
+        }
+
+        & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repo 'release.ps1') -PackageOnly
+        if ($LASTEXITCODE -ne 0) { throw ($m + ' release.ps1 -PackageOnly 失败（退出码 ' + $LASTEXITCODE + '）') }
+
+        $zip = Join-Path $repo ('release\SurvivalLog.' + $m + '_v' + $mv + '.zip')
+        if (-not (Test-Path $zip)) { throw ('打包产物缺失: ' + $zip) }
     }
-    $plug = Get-ChildItem (Join-Path $repo ('SurvivalLog.' + $m)) -Filter '*Plugin.cs' | Select-Object -First 1
-    if ($plug -and (([System.IO.File]::ReadAllText($plug.FullName)) -notmatch 'WelcomeTip\.Install')) {
-        throw ($plug.Name + ' 缺少 WelcomeTip.Install(Log) 调用（防盗署名气泡为套件规范）')
-    }
-
-    & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repo 'release.ps1') -PackageOnly
-    if ($LASTEXITCODE -ne 0) { throw ($m + ' release.ps1 -PackageOnly 失败（退出码 ' + $LASTEXITCODE + '）') }
-
-    $zip = Join-Path $repo ('release\SurvivalLog.' + $m + '_v' + $mv + '.zip')
-    if (-not (Test-Path $zip)) { throw ('打包产物缺失: ' + $zip) }
     Copy-Item $zip $relRoot -Force
     # installer.iss 的 [Files] 直接引用 release\SurvivalLog.<Mod>_v<ver>\ 目录（非 zip），
     # 故将各仓 zip 解包成同名目录供 ISCC 使用
-    $dir = Join-Path $relRoot ('SurvivalLog.' + $m + '_v' + $mv)
+    $dir = Join-Path $relRoot ('SurvivalLog.' + $m + '_v' + $mvers[$m])
     if (Test-Path $dir) { Remove-Item $dir -Recurse -Force }
     Expand-Archive -Path $zip -DestinationPath $dir -Force
-    Write-Host ('OK  ' + $m + '  v' + $mv + '  -> zip + 安装器源目录')
+    $pinTag = ''
+    if ($pin) { $pinTag = '  [pinned]' }
+    Write-Host ('OK  ' + $m + '  v' + $mvers[$m] + $pinTag + '  -> zip + 安装器源目录')
 }
-Write-Host ('12 mod 仓 PackageOnly 全部完成（版本: ' + (($suiteMods | ForEach-Object { $_ + '=' + $mvers[$_] }) -join ', ') + '）')
+Write-Host ('13 mod 仓产物就绪（版本: ' + (($suiteMods | ForEach-Object { $_ + '=' + $mvers[$_] }) -join ', ') + '）')
 
 # ---------- 3. Base 基座包（源=游戏目录，含 unity-libs 预置与 BepInEx.cfg Logging.Disk=true）----------
 & (Join-Path $tools 'make_base_release.ps1')
@@ -123,7 +137,7 @@ foreach ($f in $artifacts) {
     if (-not (Test-Path $f)) { throw ('产物缺失: ' + $f) }
     Copy-Item $f $stage -Force
 }
-Write-Host ('网盘上传目录: ' + $stage + $syncHint + '（' + $artifacts.Count + ' 件：安装器+说明+Base zip+12 mod zip）')
+Write-Host ('网盘上传目录: ' + $stage + $syncHint + '（' + $artifacts.Count + ' 件：安装器+说明+Base zip+13 mod zip）')
 
 # 说明：GitHub 只做源码管理，中枢仓 Release 仅 tag + 更新说明，不上传任何安装包（安装包只进网盘目录）
 
