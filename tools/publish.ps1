@@ -57,8 +57,15 @@ foreach ($m in $suiteMods) {
         if (-not (Test-Path $zip)) { throw ($m + ' 钉版 v' + $pin + ' 的历史 zip 缺失: ' + $zip + '（重跑该仓 release.ps1 -PackageOnly 或核对 pins）') }
         $mvers[$m] = $pin
     } else {
-        git -C $repo pull --ff-only
-        if ($LASTEXITCODE -ne 0) { throw ('git pull --ff-only 失败: ' + $m + '（先处理本地/远端分叉再发版）') }
+        # 网络重试：境内连 GitHub 偶发 TLS 握手瞬断（2026-11-03 实锤两次，随机仓），3 次退避重试
+        $pullOk = $false
+        foreach ($try in 1..3) {
+            git -C $repo pull --ff-only
+            if ($LASTEXITCODE -eq 0) { $pullOk = $true; break }
+            Write-Host ('git pull 第 ' + $try + ' 次失败（' + $m + '），5 秒后重试')
+            Start-Sleep -Seconds 5
+        }
+        if (-not $pullOk) { throw ('git pull --ff-only 失败: ' + $m + '（重试 3 次仍不通：网络问题或本地/远端分叉，处理后再发版）') }
 
         $csproj = Join-Path $repo ('SurvivalLog.' + $m + '\SurvivalLog.' + $m + '.csproj')
         if (-not (Test-Path $csproj)) { throw ('csproj 缺失: ' + $csproj) }
