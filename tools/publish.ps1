@@ -193,18 +193,23 @@ if (-not $SkipGithub -and (Test-Path (Join-Path $suite '.git'))) {
 # ---------- 9. 清理旧版本产物（不堆积：release 与 baidu_upload 只保留当前版本集）----------
 # 锚定版本命名格式（SurvivalLog.X_vN.N(.zip) / 生存日志MOD安装器_vN.N.exe），
 # 绝不误删 测试版/预览版（文件名带后缀不匹配锚定模式）、promo、安装说明等。
-# 多仓化调整：版本不再全线齐步——保留集 = suite 号（Base/安装器）+ 本轮各 mod csproj 版本
-# （旧版逻辑只认套件号，mod 独立升版后会把刚产出的 mod zip/目录误删）。
-$keepVers = @($ver) + @($suiteMods | ForEach-Object { $mvers[$_] })
+# 保留集 = **本轮产物文件名单**（非版本号集合）——混合版本发版下版本号会撞车：
+# 旧逻辑按"版本号在保留集"判断，本轮钉 v1.7.0 时会把老的 Base_v1.7.0.zip、已退役的
+# RoleUnlock_v1.7.0.zip、旧 ModCenter_v1.7.0.zip 一并留下（2026-11-03 v1.8.0 实锤残留 3 件）。
+$keepNames = @(
+    ('SurvivalLog.Base_v' + $ver + '.zip'),
+    ('生存日志MOD安装器_v' + $ver + '.exe')
+) + @($suiteMods | ForEach-Object { 'SurvivalLog.' + $_ + '_v' + $mvers[$_] + '.zip' })
+$keepDirNames = @($keepNames | ForEach-Object { $_ -replace '\.zip$', '' })
 function Remove-OldArtifacts($rootDir) {
     if (-not (Test-Path $rootDir)) { return }
     Get-ChildItem $rootDir | Where-Object {
         $n = $_.Name
         (($_ -is [System.IO.FileInfo]) -and (
-            ($n -match '^SurvivalLog\..+_v(?<v>[\d.]+)\.zip$' -and ($Matches['v'] -notin $keepVers)) -or
+            ($n -match '^SurvivalLog\..+_v[\d.]+\.zip$' -and ($n -notin $keepNames)) -or
             ($n -match '^生存日志MOD安装器_v[\d.]+\.exe$' -and $n -ne ('生存日志MOD安装器_v' + $ver + '.exe'))
         )) -or
-        (($_ -is [System.IO.DirectoryInfo]) -and $n -match '^SurvivalLog\..+_v(?<v>[\d.]+)$' -and ($Matches['v'] -notin $keepVers))
+        (($_ -is [System.IO.DirectoryInfo]) -and $n -match '^SurvivalLog\..+_v[\d.]+$' -and ($n -notin $keepDirNames))
     } | ForEach-Object {
         Write-Host ('清理旧产物: ' + $_.Name)
         Remove-Item $_.FullName -Recurse -Force
