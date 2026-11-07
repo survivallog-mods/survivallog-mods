@@ -11,14 +11,12 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 
 // mod 清单（发版白名单口径：套件 9 + PlanPick/PreDisasterSpeed/EndlessGuard；
-// StackLimit999 禁发（硬规则 6），探针禁发（硬规则 5），CabinetSize WIP 未列）
+// StackLimit999 禁发（硬规则 6），探针禁发（硬规则 5），CabinetSize WIP 未列；
+// 2026-11-07 负重批退役：BackpackExpand/CabinetSize/CabinetBurden 三 mod 并入更好的储物系统，行移除）
 const MODS = [
-  { dir: 'SurvivalLog.BackpackExpand',   cn: '背包扩容',     en: 'Backpack Expand',        file: 'BackpackExpand', cover: 'bp-cover.jpg' },
-  { dir: 'SurvivalLog.CabinetSize',     cn: '柜子容量',     en: 'Cabinet Size',           file: 'CabinetSize', cover: 'cs-cover.jpg' },
   { dir: 'SurvivalLog.FridgeChill',      cn: '冰箱保鲜',     en: 'Fridge Chill',           file: 'FridgeChill', cover: 'fc-cover.jpg' },
   { dir: 'SurvivalLog.QuickAction',      cn: '动作提速',     en: 'Quick Action',           file: 'QuickAction', cover: 'qa-cover.jpg' },
   { dir: 'SurvivalLog.CabinetEverywhere',cn: '储藏柜直达',   en: 'Cabinet Everywhere',     file: 'CabinetEverywhere', cover: 'ce-cover.jpg' },
-  { dir: 'SurvivalLog.CabinetBurden',    cn: '柜子负重解放', en: 'Cabinet Burden Unbound', file: 'CabinetBurden', cover: 'cb-cover.jpg' },
   { dir: 'SurvivalLog.RoleUnlock',       cn: '角色专属解锁', en: 'Role Unlock',            file: 'RoleUnlock', cover: 'ru-cover.jpg' },
   { dir: 'SurvivalLog.RobotSpeed',       cn: '机器人提速',   en: 'Robot Speed',            file: 'RobotSpeed', cover: 'rs-cover.jpg' },
   { dir: 'SurvivalLog.ModCenter',        cn: 'MOD 管理中心', en: 'Mod Center',             file: 'ModCenter', cover: 'mc-cover.jpg' },

@@ -22,7 +22,7 @@ foreach ($l in $issLines) {
         if ($l -notmatch 'Types:\s*recommended\s+full\s+custom') { $matrixFails += 'base 的 Types 必须列出全部类型' }
         if ($l -match 'fixed') { $matrixFails += 'base 不得用 fixed 旗标（Inno7 下 fixed 复选框不勾选显示错误，已改为 NextButtonClick 校验强制勾选）' }
     }
-    if ($cname -in @('mod_backpack','mod_cabinet','mod_fridge','mod_chill','mod_cabaccess','mod_cabburden','mod_unlockhub','mod_quick','mod_quick\qa_item','mod_quick\qa_misc','mod_quick\qa_maint','mod_quick\qa_furn','mod_quick\qa_fun','mod_robotspeed','mod_center','mod_endless','mod_planpick','mod_predisaster','mod_savemgr') -and $l -notmatch 'Types:\s*recommended\s') { $matrixFails += ($cname + ' 的 Types 缺少 recommended（默认类型下应勾选）') }
+    if ($cname -in @('mod_fridge','mod_chill','mod_cabaccess','mod_unlockhub','mod_quick','mod_quick\qa_item','mod_quick\qa_misc','mod_quick\qa_maint','mod_quick\qa_furn','mod_quick\qa_fun','mod_robotspeed','mod_center','mod_endless','mod_planpick','mod_predisaster','mod_savemgr') -and $l -notmatch 'Types:\s*recommended\s') { $matrixFails += ($cname + ' 的 Types 缺少 recommended（默认类型下应勾选）') }
 }
 $recLine = $issLines | Where-Object { $_ -match '^Name: "recommended";' } | Select-Object -First 1
 if (-not $recLine) { throw '[Types] 缺少 recommended 类型' }
@@ -35,8 +35,8 @@ Write-Host 'OK  组件/类型归属矩阵校验通过'
 if (Test-Path $test) { Remove-Item $test -Recurse -Force }
 New-Item $setupDir -ItemType Directory -Force | Out-Null
 
-# --- 测试 1：静默安装，只选 背包扩容 + 动作提速（base 固定必装）---
-# 预放一个"玩家旧配置"，验证 onlyifdoesntexist 不覆盖
+# --- 测试 1：静默安装，只选 动作提速（base 固定必装；2026-11-07 负重批退役后背包扩容组件已移除）---
+# 预放一个退役 mod 的"玩家旧配置"（backpackexpand），验证负重批 InstallDelete 清理路径——插件已不存在，cfg 必须删掉
 New-Item (Join-Path $setupDir 'BepInEx\config') -ItemType Directory -Force | Out-Null
 Set-Content (Join-Path $setupDir 'BepInEx\config\com.local.survivallog.backpackexpand.cfg') 'WidthMult = 9  # 玩家自己调过的'
 # 预放"上次安装过、本次未勾选"的柜子扩容 dll + 一个第三方插件 dll：
@@ -49,7 +49,7 @@ Set-Content (Join-Path $setupDir 'BepInEx\plugins\SomeThirdPartyMod.dll') 'THIRD
 Set-Content (Join-Path $setupDir 'BepInEx\plugins\SurvivalLog.CabinetTagFilter.dll') 'OLD-TAGFILTER-DLL'
 Set-Content (Join-Path $setupDir 'BepInEx\config\com.local.survivallog.cabinettagfilter.cfg') 'OLD-TAGFILTER-CFG'
 
-$p = Start-Process -FilePath $setup -ArgumentList '/VERYSILENT','/NORESTART','/SUPPRESSMSGBOXES',("/DIR=`"$setupDir`""),'/COMPONENTS="base,mod_backpack,mod_quick"' -Wait -PassThru
+$p = Start-Process -FilePath $setup -ArgumentList '/VERYSILENT','/NORESTART','/SUPPRESSMSGBOXES',("/DIR=`"$setupDir`""),'/COMPONENTS="base,mod_quick"' -Wait -PassThru
 Write-Host ("安装退出码: " + $p.ExitCode)
 if ($p.ExitCode -ne 0) { $script:fails += ('安装器退出码 ' + $p.ExitCode) }
 
@@ -69,10 +69,10 @@ Check 'BepInEx\core\BepInEx.Core.dll' $true
 Check 'BepInEx\unity-libs\6000.2.7.zip' $true
 Check 'BepInEx\unity-libs\UnityEngine.CoreModule.dll' $true
 Check 'BepInEx\config\BepInEx.cfg' $true
-Check 'BepInEx\plugins\SurvivalLog.BackpackExpand.dll' $true
+Check 'BepInEx\plugins\SurvivalLog.BackpackExpand.dll' $false
 Check 'BepInEx\plugins\SurvivalLog.QuickAction.dll' $true
 Check 'BepInEx\config\com.local.survivallog.quickaction.cfg' $true
-Check 'MOD说明\背包扩容.md' $true
+Check 'MOD说明\背包扩容.md' $false
 Check 'MOD说明\动作提速.md' $true
 Check 'BepInEx\plugins\SurvivalLog.CabinetExpand.dll' $false
 Check 'BepInEx\plugins\SurvivalLog.CabinetEverywhere.dll' $false
@@ -87,10 +87,10 @@ Check 'BepInEx\patchers\MCShell.dll' $false
 Check 'BepInEx\plugins\SomeThirdPartyMod.dll' $true
 Check 'unins000.exe' $true
 
-Write-Host '--- 旧配置保留检查（应仍为 WidthMult = 9）---'
-$kept = Get-Content (Join-Path $setupDir 'BepInEx\config\com.local.survivallog.backpackexpand.cfg') -TotalCount 1
-Write-Host $kept
-if ($kept -notmatch 'WidthMult\s*=\s*9') { $script:fails += '玩家旧配置被覆盖（onlyifdoesntexist 失效）' }
+Write-Host '--- 退役 mod 旧配置清理检查（backpackexpand cfg 应已被 InstallDelete 删除）---'
+Check 'BepInEx\config\com.local.survivallog.backpackexpand.cfg' $false
+Check 'BepInEx\config\com.local.survivallog.cabinetburden.cfg' $false
+Check 'BepInEx\config\com.local.survivallog.cabinetsize.cfg' $false
 
 $dotnetN = (Get-ChildItem (Join-Path $setupDir 'dotnet') -File).Count
 $coreN   = (Get-ChildItem (Join-Path $setupDir 'BepInEx\core') -File -Recurse).Count

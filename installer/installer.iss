@@ -13,12 +13,7 @@
 #define RelRoot "..\release"
 #endif
 ; per-mod 版本（双轨：mod 包目录名 = mod 自身版本；由 tools\build_installer.ps1 注入 /DVer<Mod>=x.y.z）
-#ifndef VerBackpackExpand
-#define VerBackpackExpand "1.7.0"
-#endif
-#ifndef VerCabinetSize
-#define VerCabinetSize "1.7.0"
-#endif
+; 2026-11-07 负重批退役：BackpackExpand/CabinetSize/CabinetBurden 三 mod 并入 CabinetEverywhere（背包/柜子高度+负重），不再随安装器分发
 #ifndef VerFridgeChill
 #define VerFridgeChill "1.7.0"
 #endif
@@ -27,9 +22,6 @@
 #endif
 #ifndef VerCabinetEverywhere
 #define VerCabinetEverywhere "1.7.0"
-#endif
-#ifndef VerCabinetBurden
-#define VerCabinetBurden "1.7.0"
 #endif
 #ifndef VerUnlockHub
 #define VerUnlockHub "1.8.0"
@@ -81,19 +73,16 @@ Name: "chs"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
 
 [Types]
 ; recommended 必须排第一：Inno 默认选中 [Types] 首项。
-; "推荐安装"只含默认开的组件（4 扩容 + 吃/交互/维护提速），家具功能/娱乐锻炼默认不勾；
+; "推荐安装"只含默认开的组件（保鲜 + 储物系统 + 吃/交互/维护提速 + 机器人提速），家具功能/娱乐锻炼默认不勾；
 ; 下拉可切"全部安装"一键全勾。custom 实测会镜像前一个所选类型，不能用作默认不勾的载体。
-Name: "recommended"; Description: "推荐安装（背包/柜子含冰箱/保鲜扩容 + 柜子直达（含场景视图/标签筛选）与负重 + 吃/交互/维护提速 + 机器人提速）"
+Name: "recommended"; Description: "推荐安装（保鲜增强 + 更好的储物系统（直达/视图/筛选/高度/负重） + 吃/交互/维护提速 + 机器人提速）"
 Name: "full"; Description: "全部安装（基座 + 全部 MOD）"
 Name: "custom"; Description: "自选安装"; Flags: iscustom
 
 [Components]
 Name: "base"; Description: "MOD 框架基座（必装，不装它任何 MOD 都不生效）"; Types: recommended full custom
-Name: "mod_backpack"; Description: "背包扩容：格子宽高各×1.5（约2.2倍面积），负重×2"; Types: recommended full custom
-Name: "mod_cabinet"; Description: "柜子容量：家里全部柜子按 小/中/大/特大 四档统一调到固定宽×高（默认14x10~20x16，逐档可改），13 个常用包独立微调、任意柜可个性化定值，改值热生效（原「柜子扩容」百分比版已废弃，由本组件取代）"; Types: recommended full custom
 Name: "mod_chill"; Description: "冰箱保鲜：保鲜5倍→10倍"; Types: recommended full custom
-Name: "mod_cabaccess"; Description: "储藏柜直达（直达+智能视图+筛选）：储物柜/橱柜/金属柜进工作台/无人机交易/烹饪等界面，制作自动取料；按界面场景视图（食物/材料）自动收窄页签，或下拉按标签筛选柜子页签（原「柜子标签筛选」mod 已并入本组件）"; Types: recommended full custom
-Name: "mod_cabburden"; Description: "柜子负重解放：全部储物家具（柜子/篮子/储物柜/货车厢/无人机舱等10种）负重无限制，格子没满就能继续放；默认不碰购物车/轿车（可调）"; Types: recommended full custom
+Name: "mod_cabaccess"; Description: "更好的储物系统（直达+智能视图+筛选+高度+负重）：储物柜/橱柜/金属柜进工作台/无人机交易/烹饪等界面，制作自动取料；按界面场景视图（食物/材料）自动收窄页签，或下拉按标签筛选柜子页签；背包/柜子高度逐包可调（宽恒12）；背包负重按公斤可调 + 柜子负重解放（原「柜子标签筛选」「背包扩容」「柜子容量」「柜子负重解放」四 mod 已先后并入本组件）"; Types: recommended full custom
 Name: "mod_unlockhub"; Description: "解锁中心：角色专属内容全解锁（藤蔓种子/防御配方/规划/花瓶）+ 交易解锁（无人机货架买完即刷新上架）；关闭即还原官方门槛"; Types: recommended full custom
 Name: "mod_robotspeed"; Description: "机器人提速：修理/整理/种植机器人不再比手动慢（动作对齐手速+移速/充电/续航翻倍+三台货舱扩容；不含插槽与模块）"; Types: recommended full custom
 Name: "mod_quick"; Description: "动作提速：按游戏官方分类统一提速，周期结算收益的动作自动保护"; Types: recommended full custom
@@ -145,6 +134,11 @@ Type: files; Name: "{app}\BepInEx\config\quickaction.boot.ini"
 ; 旧独立筛选 mod 的 cfg（合并后插件已不存在，此 cfg 永久失效——清掉防误导；
 ; 其开关由储藏柜直达 cfg 的 [Filter] Enable 接管，默认 true=筛选重新开启）
 Type: files; Name: "{app}\BepInEx\config\com.local.survivallog.cabinettagfilter.cfg"
+; 2026-11-07 负重批退役三 mod 的 cfg（同上口径：插件已不存在，cfg 永久失效清掉防误导；
+; 高度/负重全部由更好的储物系统 cfg 的 [Rail]/[Burden] 区接管——老数值不自动迁移，面板重设即可）
+Type: files; Name: "{app}\BepInEx\config\com.local.survivallog.backpackexpand.cfg"
+Type: files; Name: "{app}\BepInEx\config\com.local.survivallog.cabinetsize.cfg"
+Type: files; Name: "{app}\BepInEx\config\com.local.survivallog.cabinetburden.cfg"
 Type: files; Name: "{app}\MOD说明\背包扩容.md"
 Type: files; Name: "{app}\MOD说明\柜子扩容.md"
 Type: files; Name: "{app}\MOD说明\柜子容量.md"
@@ -178,27 +172,16 @@ Components: base; Source: "{#RelRoot}\SurvivalLog.Base_v{#SuiteVer}\BepInEx\core
 Components: base; Source: "{#RelRoot}\SurvivalLog.Base_v{#SuiteVer}\BepInEx\unity-libs\*"; DestDir: "{app}\BepInEx\unity-libs"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; cfg 不覆盖玩家已有配置（重装/换组件时保留调好的数值）
 Components: base; Source: "{#RelRoot}\SurvivalLog.Base_v{#SuiteVer}\BepInEx\config\BepInEx.cfg"; DestDir: "{app}\BepInEx\config"; Flags: onlyifdoesntexist
-; ---- 背包扩容 ----
-Components: mod_backpack; Source: "{#RelRoot}\SurvivalLog.BackpackExpand_v{#VerBackpackExpand}\BepInEx\plugins\SurvivalLog.BackpackExpand.dll"; DestDir: "{app}\BepInEx\plugins"; Flags: ignoreversion
-Components: mod_backpack; Source: "{#RelRoot}\SurvivalLog.BackpackExpand_v{#VerBackpackExpand}\BepInEx\config\com.local.survivallog.backpackexpand.cfg"; DestDir: "{app}\BepInEx\config"; Flags: onlyifdoesntexist
-Components: mod_backpack; Source: "{#RelRoot}\SurvivalLog.BackpackExpand_v{#VerBackpackExpand}\README.md"; DestDir: "{app}\MOD说明"; DestName: "背包扩容.md"; Flags: ignoreversion
-; ---- 柜子扩容 ----
-; ---- 柜子容量（v1.7.0 起取代柜子扩容；cfg 不预置：首跑按代码默认生成） ----
-Components: mod_cabinet; Source: "{#RelRoot}\SurvivalLog.CabinetSize_v{#VerCabinetSize}\BepInEx\plugins\SurvivalLog.CabinetSize.dll"; DestDir: "{app}\BepInEx\plugins"; Flags: ignoreversion
-Components: mod_cabinet; Source: "{#RelRoot}\SurvivalLog.CabinetSize_v{#VerCabinetSize}\README.md"; DestDir: "{app}\MOD说明"; DestName: "柜子容量.md"; Flags: ignoreversion
-; ---- 冰箱扩容已并入柜子扩容（2026-10-13）：此处只保留升级清理（InstallDelete 区的旧 dll/说明文件） ----
+; ---- 背包扩容/柜子扩容/柜子容量/柜子负重解放：2026-11-07 负重批退役，功能并入下方更好的储物系统；
+;      此处只保留升级清理（InstallDelete 区的旧 dll/说明文件） ----
 ; ---- 冰箱保鲜 ----
 Components: mod_chill; Source: "{#RelRoot}\SurvivalLog.FridgeChill_v{#VerFridgeChill}\BepInEx\plugins\SurvivalLog.FridgeChill.dll"; DestDir: "{app}\BepInEx\plugins"; Flags: ignoreversion
 Components: mod_chill; Source: "{#RelRoot}\SurvivalLog.FridgeChill_v{#VerFridgeChill}\BepInEx\config\com.local.survivallog.fridgechill.cfg"; DestDir: "{app}\BepInEx\config"; Flags: onlyifdoesntexist
 Components: mod_chill; Source: "{#RelRoot}\SurvivalLog.FridgeChill_v{#VerFridgeChill}\README.md"; DestDir: "{app}\MOD说明"; DestName: "冰箱保鲜.md"; Flags: ignoreversion
-; ---- 储藏柜直达 ----
+; ---- 储藏柜直达（更好的储物系统：2026-11-07 起含高度修改与负重调整） ----
 Components: mod_cabaccess; Source: "{#RelRoot}\SurvivalLog.CabinetEverywhere_v{#VerCabinetEverywhere}\BepInEx\plugins\SurvivalLog.CabinetEverywhere.dll"; DestDir: "{app}\BepInEx\plugins"; Flags: ignoreversion
 Components: mod_cabaccess; Source: "{#RelRoot}\SurvivalLog.CabinetEverywhere_v{#VerCabinetEverywhere}\BepInEx\config\com.local.survivallog.cabineteverywhere.cfg"; DestDir: "{app}\BepInEx\config"; Flags: onlyifdoesntexist
 Components: mod_cabaccess; Source: "{#RelRoot}\SurvivalLog.CabinetEverywhere_v{#VerCabinetEverywhere}\README.md"; DestDir: "{app}\MOD说明"; DestName: "储藏柜直达.md"; Flags: ignoreversion
-; ---- 柜子负重解放 ----
-Components: mod_cabburden; Source: "{#RelRoot}\SurvivalLog.CabinetBurden_v{#VerCabinetBurden}\BepInEx\plugins\SurvivalLog.CabinetBurden.dll"; DestDir: "{app}\BepInEx\plugins"; Flags: ignoreversion
-Components: mod_cabburden; Source: "{#RelRoot}\SurvivalLog.CabinetBurden_v{#VerCabinetBurden}\BepInEx\config\com.local.survivallog.cabinetburden.cfg"; DestDir: "{app}\BepInEx\config"; Flags: onlyifdoesntexist
-Components: mod_cabburden; Source: "{#RelRoot}\SurvivalLog.CabinetBurden_v{#VerCabinetBurden}\README.md"; DestDir: "{app}\MOD说明"; DestName: "柜子负重解放.md"; Flags: ignoreversion
 ; ---- 解锁中心（原角色专属解锁，v1.8.0 更名）----
 Components: mod_unlockhub; Source: "{#RelRoot}\SurvivalLog.UnlockHub_v{#VerUnlockHub}\BepInEx\plugins\SurvivalLog.UnlockHub.dll"; DestDir: "{app}\BepInEx\plugins"; Flags: ignoreversion
 Components: mod_unlockhub; Source: "{#RelRoot}\SurvivalLog.UnlockHub_v{#VerUnlockHub}\BepInEx\config\com.local.survivallog.unlockhub.cfg"; DestDir: "{app}\BepInEx\config"; Flags: onlyifdoesntexist
@@ -477,11 +460,8 @@ begin
       exit;
     end;
   begin
-    if not (WizardIsComponentSelected('mod_backpack') or
-            WizardIsComponentSelected('mod_cabinet') or
-            WizardIsComponentSelected('mod_chill') or
+    if not (WizardIsComponentSelected('mod_chill') or
             WizardIsComponentSelected('mod_cabaccess') or
-            WizardIsComponentSelected('mod_cabburden') or
             WizardIsComponentSelected('mod_unlockhub') or
             WizardIsComponentSelected('mod_quick') or
             WizardIsComponentSelected('mod_robotspeed') or

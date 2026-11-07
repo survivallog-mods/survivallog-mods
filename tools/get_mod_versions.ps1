@@ -5,9 +5,10 @@
 #   version.json "pins" overrides a mod to ship an ALREADY-RELEASED historical zip
 #   (no pull / no gate / no rebuild - byte-identical to the original GitHub Release asset).
 
-# The 13 suite mods bundled by the installer (order = installer component order).
+# The suite mods bundled by the installer (order = installer component order).
+# 2026-11-07 -BackpackExpand/-CabinetSize/-CabinetBurden (retired: merged into CabinetEverywhere v1.8.6).
 function Get-SuiteModList() {
-    return @('BackpackExpand','CabinetSize','FridgeChill','QuickAction','CabinetEverywhere','CabinetBurden','UnlockHub','RobotSpeed','ModCenter','EndlessGuard','PlanPick','PreDisasterSpeed','SaveMgr')
+    return @('FridgeChill','QuickAction','CabinetEverywhere','UnlockHub','RobotSpeed','ModCenter','EndlessGuard','PlanPick','PreDisasterSpeed','SaveMgr')
 }
 
 # Author pin table from suite version.json (empty table when absent).
