@@ -197,6 +197,11 @@
         "type": "GameCore.HotUpdate.ReduxUI.Reducer_Web_TradeUI",
         "method": "ConsumeActiveShelfStock",
         "params": 2
+      },
+      {
+        "type": "GameCore.HotUpdate.GameKey",
+        "method": "get_GlobalSetting_RebirthMaxChances",
+        "params": 0
       }
     ],
     "configFields": [
