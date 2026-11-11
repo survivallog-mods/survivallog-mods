@@ -231,6 +231,24 @@
           "craft_level",
           "show_level"
         ]
+      },
+      {
+        "accessor": "_Config_AttributeStandard_Dict",
+        "rowType": "Config_AttributeStandard",
+        "fields": [
+          "Max",
+          "Des_Local",
+          "Name"
+        ]
+      },
+      {
+        "accessor": "_Config_Buff_Dict",
+        "rowType": "Config_Buff",
+        "fields": [
+          "MaxLayerCount",
+          "Name_Local",
+          "Name"
+        ]
       }
     ],
     "nativeSigs": []
