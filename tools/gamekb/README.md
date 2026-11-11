@@ -6,6 +6,6 @@
 | sigscan.js | `node sigscan.js <GameAssembly.dll>` | FridgeChill 字节签名静态验证（模块可复用于任意 ?? 通配签名） |
 | modcompat_check.js | `node modcompat_check.js <gamekb版本目录>` | 按 moddeps.json 核对 mod 依赖；全绿 exit 0，有红 exit 1 |
 | moddeps.json | — | 全套件对外部代码的依赖清单（改挂钩点必须同步维护） |
-| gamekb_sync.ps1 | `powershell -File gamekb_sync.ps1 [-AutoProbe]` | 游戏更新后一键同步（见 docs/07 §5） |
+| gamekb_sync.ps1 | `powershell -File gamekb_sync.ps1 [-AutoProbe] [-KeepVersions N]` | 游戏更新后一键同步（见 docs/07 §5）；收尾自动清理旧版本目录，默认只留最新 1 份（N=0 关闭清理） |
 
-数据目录 `gamekb/` 不入库（版权红线），只在本机留存。
+数据目录在 suite 仓外一层 `..\gamekb\`（版权红线：不在任何 git 仓内），只在本机留存、只保留最新一版快照（2026-11-05 起）。

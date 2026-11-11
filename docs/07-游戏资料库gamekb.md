@@ -2,15 +2,16 @@
 
 > 2026-10-23 设计定稿（作者拍板"按推荐方案"）。本文档是 gamekb 的权威说明（"项目记忆文档"），
 > 与 [05-版本管理与发版.md](05-版本管理与发版.md) 同级：05 管"怎么发版"，本文管"游戏更新了怎么同步资料、怎么核对 mod 兼容"。
-> 状态：**已实施（2026-10-23）**。工具在 `tools/gamekb/`，数据在本地 `gamekb/`（gitignored）。
+> 状态：**已实施（2026-10-23）**。工具在 `tools/gamekb/`，数据在 `..\gamekb\`（suite 仓外一层、
+> 不在任何 git 仓内——2026-10-28 迁移 T5 定址；suite `.gitignore` 的 `/gamekb/` 锚位系预留未用）。
 
 ## 0. 已定决策（2026-10-23 作者拍板）
 
 | 决策点 | 定案 |
 |---|---|
 | ConfigDumpProbe（表数据探针） | **做**——"全部游戏设定数值"的唯一来源（配置 bundle 全加密，无第二条路） |
-| 存放位置 | **仓内 `gamekb/`，整目录 .gitignore**；公开内容只有 tools 工具源码 + 本文档 |
-| 保留代数 | **全留**（磁盘 ~400MB/版，无压力） |
+| 存放位置 | **suite 仓外一层 `..\gamekb\`**（2026-10-28 迁移 T5 定址，天然不入库）；公开内容只有 tools 工具源码 + 本文档 |
+| 保留代数 | **只留最新一版**（2026-11-05 作者拍板，替代 10-23 的"全留"；sync 收尾自动清理旧版，`-KeepVersions N` 可调；diff 报告随新版留存，跨版增量知识不丢） |
 | DummyDll / il2cpp.h | **不逐版留存**；改为**保留源二进制**（GameAssembly.dll + global-metadata.dat），需要时随时重出 |
 | 储物柜直达（CabinetEverywhere）筛选 NOFRAME 问题 | **不属 gamekb 范围**，作者自理（2026-10-23 更新影响排查中发现的唯一问题） |
 
@@ -46,8 +47,8 @@ MainPackage 加密 bundle 破解（无计划）；任何形式的公开分发（
 ## 3. 目录结构与命名
 
 ```
-gamekb/
-  2026-10-23_26157732/            ← 每版一目录：<捕获日期>_<buildid>
+gamekb/                            ← suite 仓外一层（..\gamekb）
+  2026-11-05_26454866/            ← 每版一目录：<捕获日期>_<buildid>；只保留最新一版（sync 收尾自动清旧版）
     meta.json                      ← 见下方 schema
     binaries/
       GameAssembly.dll
@@ -58,9 +59,9 @@ gamekb/
       _index.json                  ← 表名/行数/字段清单/内容哈希（含 _DONE 自证）
       Config_Item.json  Config_Furniture.json  ...
     webui/                         ← StreamingAssets\WebUI 全量镜像
-    diff_from_2026-10-21.md        ← 与上一版的结构 diff + mod 兼容核对结果（自动生成）
-  2026-10-21_<prevbuildid>/        ← 首个历史基线（从现有 tools/il2cppdumper/base_v20261021 迁入；
-                                       无 binaries/webui/tables，标注 partial: true）
+    diff_from_2026-10-23.md        ← 与上一版的结构 diff + mod 兼容核对结果（自动生成；上一版目录
+                                     被清理后此报告是唯一的跨版增量记录）
+  steam_shots/  webui_shots/       ← 截图等工件目录（非版本快照，sync 不碰）
 ```
 
 - `meta.json` schema：
@@ -83,7 +84,8 @@ gamekb/
 
 ## 4. git 与版权红线
 
-- **`gamekb/` 整目录 .gitignore**（实现时在 .gitignore 加一节）。理由：dump/表数值/游戏二进制/
+- **数据目录在 suite 仓外一层（`..\gamekb\`），不在任何 git 仓内**（2026-10-28 迁移 T5 定址；
+  早先"整目录 .gitignore"方案留有 `/gamekb/` 锚位未用）。理由：dump/表数值/游戏二进制/
   WebUI 资源均为游戏本体衍生物，仓库公开（GitHub 组织 survivallog-mods：中枢仓与 12 mod 仓），公开即侵权风险，
   与 N网 mod 转载红线（[03-教训与红线.md](03-教训与红线.md)）同理。
 - **公开内容仅限**：`tools/gamekb/` 工具源码、`moddeps.json`（只有符号名清单，属 mod 开发接口
@@ -110,7 +112,10 @@ gamekb/
    `steam://rungameid/4164790` 拉起 → 轮询 `BepInEx\gamekb_tables\<runtime_assets_version>\_DONE.txt`（版本号=meta.json 的 runtime_assets_version，采集前从游戏目录 RuntimeAssets_MainPackage.version 读得）（表就绪
    约 15–25 秒后写出）→ 确认后 taskkill + 回读进程死透再收文件。**作者正在玩时绝不自动杀进程**
    （runtime-probe 红线：先守望等游戏进程自然退出；无法确认闲置就退出自动模式留给人工）。
-9. **收尾打印**：ADDED/REMOVED 类型数、modcompat ✓/✗、表 dump 状态、`notes` 提醒人工补要点。
+9. **保留策略（收尾自动执行）**：新版完整（表 `_DONE.txt` 已收）后自动清理旧版本目录，只留最新
+   `-KeepVersions`（默认 1）份；表未收齐时**不清理**（diff 与续跑都还要旧版）。截图等工作目录
+   （非 `YYYY-MM-DD_*` 命名）不参与清理。
+10. **收尾打印**：ADDED/REMOVED 类型数、modcompat ✓/✗、表 dump 状态、`notes` 提醒人工补要点。
 
 失败处理：任何一步失败打印到哪一步、已产出什么、重跑方式（幂等：目录已存在则续跑缺项）。
 
@@ -186,7 +191,7 @@ gamekb/
 4. **表数值查阅**：写 mod 找设定实数（食物保鲜/家具电力/配方材料…）直接查 `gamekb/<ver>/tables/`，
   不再临时写探针。
 
-## 9. 首版基线（从现有产物迁入，实施第 2 步）
+## 9. 首版基线（从现有产物迁入，实施第 2 步；两目录已于 2026-11-05 按"只留最新"策略清理，下表留档）
 
 | 版本目录 | 来源 | 构成 |
 |---|---|---|
@@ -212,7 +217,7 @@ gamekb/
 | 游戏改表结构（字段增删/改名） | modcompat 亮红人工评估；dumpdiff 的 CHANGED 明细定位到行 |
 | ConfigDumpProbe 混进发布套件 | 探针红线名单制（§6），publish.ps1 白名单不含它（与 ActionProbe 同治理） |
 | 表 dump 时作者正在玩 | -AutoProbe 默认关；守望等自然退出，不确定就人工（§5.8） |
-| 磁盘增长 | ~400MB/版全留；超 10 版可手工删老版 binaries/（dump 保留） |
+| 磁盘增长 | 只留最新一版（~1GB/版，2026-11 起单版 webui 镜像已涨至 ~500MB）；sync 收尾自动清旧版 |
 | ps1 编码坑 | ASCII-only 规则（BOM 红线） |
 | Il2CppDumper.exe 被 gitignore 后换机缺失 | sync 报错并给下载指路（Perfare/Il2CppDumper net6-win） |
 | moddeps 清单与代码漂移 | 规则进各 mod DESIGN.md 迭代维护清单：改挂钩点必须同步 moddeps.json |
@@ -226,6 +231,19 @@ gamekb/
   10 个配置行类、ActionType/FurnitureType 枚举——全部存活；
 - 字节签名：FridgeChill 20 字节签名新 DLL 唯一命中 @0x29756C5、旧槽值 0.1，与运行时日志互证；
 - 运行时：interop 自动重生、9 插件全部"生效"。
+
+### 附：2026-11-05 同步实证（首次全流程半自动跑通，策略换为"只留最新"）
+
+- 更新检测：appmanifest buildid 26454866（跨两个游戏版本：1.1.20151 10-29 与 1.1.20719 11-05，
+  前者未单独快照）、RuntimeAssets 版本 1.1.20719；Unity 引擎未变（6000.2.7f2）；
+- dump 对比：25296→25356 类型，+54/-0（CasualHorde 休闲尸潮体系、CookingDishPriority、
+  TruthRecorderManager、SmartRecommendManager 扩展等）；
+- 表：125 张 / 49047 行（上版 48534）；游戏运行中探照常落盘 `_DONE.txt`，无需拉起游戏；
+- modcompat 全绿（RED=0 WARN=0，FridgeChill 签名 1 命中旧槽 0.1）；
+- 修掉 sync 两个潜伏 bug（首跑即现）：kbRoot 误指 suite 内（实际数据在仓外一层）、`$prev`
+  误选 `webui_shots` 等非版本目录；另加固 `$raVer` 反序列化污染（meta 里曾写入 PSPath 垃圾）；
+- 保留策略执行：清理 2026-10-21/2026-10-23 两目录（释放 ~1.2GB）与游戏侧旧表 dump；
+  幂等闸验证 `no update ... exit 0`。
 
 ## 13. 迭代维护清单（改动类型 → 必须同步的章节）
 

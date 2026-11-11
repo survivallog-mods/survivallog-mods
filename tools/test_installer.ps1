@@ -39,6 +39,10 @@ New-Item $setupDir -ItemType Directory -Force | Out-Null
 # 预放一个退役 mod 的"玩家旧配置"（backpackexpand），验证负重批 InstallDelete 清理路径——插件已不存在，cfg 必须删掉
 New-Item (Join-Path $setupDir 'BepInEx\config') -ItemType Directory -Force | Out-Null
 Set-Content (Join-Path $setupDir 'BepInEx\config\com.local.survivallog.backpackexpand.cfg') 'WidthMult = 9  # 玩家自己调过的'
+# 预放第三方插件自带的 cfg（第三方玩家旧配置探针）：安装不得碰、卸载不得删。
+# （负重批退役后 backpackexpand.cfg 在安装阶段即被 InstallDelete 清走，
+#   不能再当"卸载后保留"探针——2026-11-07 换本文件承担该断言）
+Set-Content (Join-Path $setupDir 'BepInEx\config\com.thirdparty.someauthor.cfg') 'THIRD-PARTY-CFG-KEEP'
 # 预放"上次安装过、本次未勾选"的柜子扩容 dll + 一个第三方插件 dll：
 # 验证 [InstallDelete] 预清理（本项目未勾选插件必须删掉、第三方插件绝不误删）
 New-Item (Join-Path $setupDir 'BepInEx\plugins') -ItemType Directory -Force | Out-Null
@@ -85,6 +89,7 @@ Check 'BepInEx\config\com.local.survivallog.cabinettagfilter.cfg' $false
 Check 'BepInEx\plugins\SurvivalLog.SaveMgr.dll' $false
 Check 'BepInEx\patchers\MCShell.dll' $false
 Check 'BepInEx\plugins\SomeThirdPartyMod.dll' $true
+Check 'BepInEx\config\com.thirdparty.someauthor.cfg' $true
 Check 'unins000.exe' $true
 
 Write-Host '--- 退役 mod 旧配置清理检查（backpackexpand cfg 应已被 InstallDelete 删除）---'
@@ -114,7 +119,7 @@ CheckGone 'winhttp.dll'
 CheckGone 'dotnet'
 CheckGone 'BepInEx\unity-libs\6000.2.7.zip'
 CheckGone 'BepInEx\plugins\SurvivalLog.QuickAction.dll'
-$cfgKept = Test-Path (Join-Path $setupDir 'BepInEx\config\com.local.survivallog.backpackexpand.cfg')
+$cfgKept = Test-Path (Join-Path $setupDir 'BepInEx\config\com.thirdparty.someauthor.cfg')
 Write-Host ("玩家旧配置保留: " + $cfgKept)
 if (-not $cfgKept) { $script:fails += '卸载时把玩家旧配置删了' }
 Write-Host ("BepInEx 目录残留(空壳属正常): " + (Test-Path (Join-Path $setupDir 'BepInEx')))

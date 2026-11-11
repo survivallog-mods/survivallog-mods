@@ -1,8 +1,10 @@
 # gamekb_sync.ps1 - one-command gamekb sync after a game update (see docs/07 section 5)
-# Usage: powershell -NoProfile -ExecutionPolicy Bypass -File tools\gamekb\gamekb_sync.ps1 [-AutoProbe]
+# Usage: powershell -NoProfile -ExecutionPolicy Bypass -File tools\gamekb\gamekb_sync.ps1 [-AutoProbe] [-KeepVersions N]
 #   -AutoProbe : also launch the game via steam:// to run ConfigDumpProbe, wait for _DONE.txt,
 #                then stop the game and collect tables. Aborts if the game is already running.
-param([switch]$AutoProbe)
+#   -KeepVersions N : retention - prune older version dirs after a complete sync (default 1 = keep newest only,
+#                per 2026-11-05 policy change; set 0 to disable pruning)
+param([switch]$AutoProbe, [int]$KeepVersions = 1)
 
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path))   # repo root
@@ -30,9 +32,14 @@ Write-Host ("game dir: " + $game)
 # ---- 2. read buildid + runtime assets version; idempotence gate ----
 $mani4164790 = Get-ChildItem (Split-Path -Parent (Split-Path -Parent $game)) -Recurse -Filter 'appmanifest_4164790.acf' -ErrorAction SilentlyContinue | Select-Object -First 1
 $buildId = [int]((Get-Content $mani4164790.FullName | Select-String '"buildid"\s+"(\d+)"').Matches[0].Groups[1].Value)
-$raVer = (Get-Content (Join-Path $game 'SurvivalLog_Data\StreamingAssets\PackageManifest\MainPackage\RuntimeAssets_MainPackage.version') -ErrorAction SilentlyContinue)
-if (-not $raVer) { $raVer = 'unknown' }
-$kbRoot = Join-Path $repo 'gamekb'
+$raVer = [string](Get-Content -LiteralPath (Join-Path $game 'SurvivalLog_Data\StreamingAssets\PackageManifest\MainPackage\RuntimeAssets_MainPackage.version') -Raw -ErrorAction SilentlyContinue)
+if ($raVer) { $raVer = $raVer.Trim() }
+# sanity gate: 2026-11-05 run showed Get-Content result can arrive as a provider-wrapped object that
+# serializes garbage (PSPath etc.) into meta.json - only accept a clean N.N.NNNNN string, else 'unknown'
+if ($raVer -notmatch '^\d+\.\d+\.\d+$') { $raVer = 'unknown' }
+# kb data lives OUTSIDE the suite repo (one level up, per 2026-10-28 migration T5): copyright red line -
+# never inside a git repo, so no .gitignore reliance. suite\ .gitignore /gamekb/ anchor stays unused.
+$kbRoot = Join-Path (Split-Path -Parent $repo) 'gamekb'
 $existing = Get-ChildItem $kbRoot -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match ('_' + $buildId + '$') }
 $captured = $null
 if ($existing) { $captured = $existing[0] }
@@ -89,8 +96,8 @@ if (-not (Test-Path (Join-Path $verDir 'il2cpp\dump.cs'))) { Write-Host 'ERROR: 
 robocopy (Join-Path $game 'SurvivalLog_Data\StreamingAssets\WebUI') (Join-Path $verDir 'webui') /MIR /NJH /NJS /NP | Out-Null
 if ($LASTEXITCODE -ge 8) { Write-Host ('ERROR: robocopy failed ' + $LASTEXITCODE); exit 1 }
 
-# ---- 7. diff vs previous version ----
-$prev = Get-ChildItem $kbRoot -Directory | Where-Object { $_.Name -ne (Split-Path -Leaf $verDir) } | Sort-Object Name -Descending | Select-Object -First 1
+# ---- 7. diff vs previous version (version dirs only: YYYY-MM-DD_<buildid>; shots/ dirs must not match) ----
+$prev = Get-ChildItem $kbRoot -Directory | Where-Object { $_.Name -match '^\d{4}-\d{2}-\d{2}_' -and $_.Name -ne (Split-Path -Leaf $verDir) } | Sort-Object Name -Descending | Select-Object -First 1
 if ($prev -and $node) {
     $diffMd = Join-Path $verDir ('diff_from_' + ($prev.Name -replace '_\d+$','') + '.md')
     & node (Join-Path $repo 'tools\gamekb\dumpdiff.js') (Join-Path $prev.FullName 'il2cpp\dump.cs') (Join-Path $verDir 'il2cpp\dump.cs') '--moddeps' (Join-Path $repo 'tools\gamekb\moddeps.json') | Out-File $diffMd -Encoding utf8
@@ -128,6 +135,15 @@ if (Test-Path $doneMarker) {
     if ($diffMdAfter -and $node) {
         & node (Join-Path $repo 'tools\gamekb\modcompat_check.js') $verDir | Tee-Object -FilePath $diffMdAfter.FullName -Append
         Write-Host ("modcompat (tables-aware) appended to " + $diffMdAfter.Name)
+    }
+    # retention (2026-11-05 policy: keep newest only): prune older version dirs once the newest one is complete
+    if ($KeepVersions -gt 0) {
+        $allVers = @(Get-ChildItem $kbRoot -Directory | Where-Object { $_.Name -match '^\d{4}-\d{2}-\d{2}_' } | Sort-Object Name -Descending)
+        $newestDone = @($allVers | Where-Object { Test-Path (Join-Path $_.FullName 'tables\_DONE.txt') })[0]
+        if ($newestDone -and $allVers.Count -gt 0 -and $newestDone.Name -eq $allVers[0].Name) {
+            $stale = $allVers | Select-Object -Skip $KeepVersions
+            foreach ($old in $stale) { Write-Host ("pruning old version dir: " + $old.Name); Remove-Item $old.FullName -Recurse -Force }
+        }
     }
 } else {
     Write-Host ('TABLES PENDING: launch the game once (probe writes BepInEx\gamekb_tables\' + $raVer + '), then rerun this script to collect.')
