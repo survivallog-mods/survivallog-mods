@@ -1,10 +1,10 @@
 ﻿{
-  "suite": "1.9.1",
+  "suite": "1.9.2",
   "pins": {
-    "CabinetEverywhere": "2.1.4",
+    "CabinetEverywhere": "2.1.7",
     "EndlessGuard": "1.7.0",
     "FridgeChill": "1.7.0",
-    "ModCenter": "2.0.11",
+    "ModCenter": "2.2.0",
     "PlanPick": "1.7.0",
     "PreDisasterSpeed": "1.7.0",
     "QuickAction": "1.8.0",
@@ -12,5 +12,5 @@
     "SaveMgr": "1.0.2",
     "UnlockHub": "1.12.1"
   },
-  "_note": "Suite = 安装器/中枢仓 tag 线（作者定义）。各 mod 版本默认以各仓 csproj <Version> 为权威；pins = 作者钉版表（发版时复用该仓 release\\ 下已发的该版 zip，不 pull 不重建），未列出的 mod 照常按 csproj 走。v1.9.1：全部 10 mod 钉版——三个 mod 升级到各自最新已发 zip（CabinetEverywhere 2.1.4 / ModCenter 2.0.11 / UnlockHub 1.12.1），其余 7 个逐字节复用 v1.9.0 已发 zip。ModCenter 2.0.11 与 UnlockHub 1.11.0+ 面板键位为配套，两者同批进套件。"
+  "_note": "Suite = 安装器/中枢仓 tag 线（作者定义）。各 mod 版本默认以各仓 csproj <Version> 为权威；pins = 作者钉版表（发版时复用该仓 release\\ 下已发的该版 zip，不 pull 不重建），未列出的 mod 照常按 csproj 走。v1.9.2：全部 10 mod 钉版——两个 mod 升级到各自最新已发 zip（CabinetEverywhere 2.1.7 / ModCenter 2.2.0），其余 8 个逐字节复用 v1.9.1 已发 zip（EndlessGuard 仓内已定号 v1.8.0 未发版，本版继续钉 1.7.0 不受影响）。\""
 }
