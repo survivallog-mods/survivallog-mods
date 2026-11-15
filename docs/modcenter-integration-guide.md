@@ -97,6 +97,57 @@ ModCenter 启动后反射枚举 BepInEx Chainloader 的全部插件（套件 9 m
 
 **行为约定**：ModCenter 优先按清单渲染；清单键在实际 cfg 中不存在时该项自动隐藏（容忍版本差异）；同一 dll 多个 `modcenter.json` 取第一个，其余忽略并记日志。
 
+### 3.1 mcSpec 2：套件清单扩展（2026-11-15 起）
+
+`mcSpec 2` 是 1 的**严格超集**（csproj 内嵌/资源发现/容错承诺与 §三 完全一致），新增字段全部可选——套件 mod（`com.local.survivallog.*` 组织仓）用它获得与第一方同款的面板能力；**扩展字段仅套件成员生效**，第三方清单写了 2 也能正常解析基本字段，但扩展字段会被搁置并记日志（启停仍走 §五 的 `.disabled` 语义、写入仍只走实际存在的键）。
+
+```json
+{
+  "mcSpec": 2,
+  "id": "com.local.survivallog.fridgechill",
+  "display": "保鲜增强", "en": "FridgeChill",
+  "summary": "冰箱/保鲜类容器食材保鲜时长倍率；天赋保鲜上限可调。",
+  "usage": {
+    "intro": "一句话功能说明（安装确认段取此行）",
+    "sections": [ { "heading": "怎么用", "bullets": ["要点 1", "要点 2"] } ]
+  },
+  "enabled": { "section": "General", "key": "Enabled" },
+  "groups": [
+    { "title": "保鲜", "order": 1, "items": [
+      { "key": "Chill:KeepMult", "label": "保鲜时长倍率", "badge": "now",
+        "type": "float", "def": 2, "min": 1, "max": 50, "step": 0.5, "order": 10 }
+    ] }
+  ],
+  "lists": [
+    { "kind": "actionOverride", "key": "其他:Overrides", "label": "动作覆盖清单", "badge": "now" }
+  ]
+}
+```
+
+新增字段（v2，全可选）：
+
+| 字段 | 说明 |
+|---|---|
+| `en` | 内部短名（面板短名路由兼容） |
+| `usage` | 使用说明 `{intro, sections:[{heading, bullets[]}]}`——详情页「使用说明」弹窗 + 仓库页安装确认功能说明段两处消费；缺省=按钮不显示 |
+| `enabled` | 启停键 `{section,key}`；省略=`General:Enabled`；字符串 `"none"`=无总开关（行恒亮锁定，面板不发启停写入） |
+| item `type` / `def` | entry 尚不存在时的类型与默认值兜底（`int`/`float`/`bool`/`sel`/`str`/`ucb`）；**entry 在场时以反射类型为准** |
+| item `opts` | sel 选项兜底（反射无 AcceptableValueList/enum 时） |
+| item `writeKeys` | 联动等值写：同节多键数组（含主键）；省略=单键 |
+| item `linkedSuffix` | 联动项动态 note 后缀（前缀"当前 宽w×高h"由 ModCenter 现场拼） |
+| item `vis` | `{key,value}` 条件显示：宿主项（同 mod `"节:键"`）当前值==value 才显示，面板即时显隐 |
+| item `cabs` | `type:"ucb"` 专用柜子白名单 `[{id,name,native}]`（下拉数据源） |
+| `lists[]` | 清单编辑器宿主：`kind=actionOverride`（"id:ms" 表+动作目录下拉）/ `bagOverride`（"id:WxH" 表）——封闭词表 |
+| `order` | 组/项排序权重（v1 已有，v2 语义钉死：**排序只在组内生效**，缺省 0，同权按声明序） |
+
+**与 v1 的三处语义差异**（v1 冻结不变，v2 新约定）：
+
+1. **区间优先级**：v1 = 清单 `min`/`max`/`opts` **覆盖** AcceptableValueRange 反射值；v2 = **反射优先**，清单只在反射缺失时兜底（套件迁移等价要求）。`step` 两个版本都只能来自清单。
+2. **键缺失**：v1 = 清单键不在 cfg 一律隐藏；v2 = entry 缺失且清单给了 `type`+`def` → 兜底展示，无兜底才隐藏。
+3. **扩展字段适用范围**：见本节开头——仅套件成员生效。
+
+**分类与排序约定（软约定，建议照办）**：分组按用户意图分类（核心开关 / 常用数值 / 低频细调 / 调试），不按 cfg 节名；item `order` 分段留空隙：`10~19` 核心开关 / `20~39` 常用数值 / `40~69` 低频细调 / `90+` 调试；group 同风格。排序纯展示层，不影响写路由与 badge。
+
 ## 四、Tier 2：深度对接（软停与状态回报）
 
 ### 4.1 Contracts 单文件（无 dll 依赖）
@@ -187,7 +238,7 @@ public static class ModCenterIntegration
 
 ## 七、ModCenter 的兼容性承诺与边界
 
-1. **接口冻结**：`mcSpec 1` 内的清单字段与 Contracts 接口签名保持不变；破坏性变更升 `mcSpec 2` 并对 1 保持兼容渲染；
+1. **接口冻结**：`mcSpec 1` 内的清单字段与 Contracts 接口签名保持不变；破坏性变更升 `mcSpec 2` 并对 1 保持兼容渲染（2026-11-15 起 `mcSpec 2` 为 1 的超集，见 §3.1；Tier 2 `ModCenterIntegration.McSpec` 门同步放行 {1,2}——对 1 是扩展放行，非破坏）；
 2. **只动声明的键**：ModCenter 只写你清单/cfg 里已存在的键；不删键；不碰 BepInEx/config 之外的任何文件（唯一例外：启停的 `.disabled` 改名）；
 3. **不拦截官方通道**：ModCenter 不挂 `WebUIVm.HandleCallback` 等官方消息链，与你的 UI 注入/消息监听互不干扰；
 4. **无硬依赖**：不装 ModCenter，你的 mod（含 Tier 2）行为完全不变——约定类型只是静静躺在程序集里没人调用；
@@ -207,7 +258,7 @@ public static class ModCenterIntegration
 ## 九、FAQ
 
 **Q：清单里能加 ModCenter 没有的控件类型吗（颜色选择器、按键绑定）？**
-A：`mcSpec 1` 支持 开关/滑条/数值/文本/下拉。新控件类型走 `mcSpec 2` 提案（附 Issue 描述场景）。
+A：`mcSpec 1` 支持 开关/滑条/数值/文本/下拉；`mcSpec 2` 另有套件专属 `ucb`（柜子清单编辑器，仅套件生效）。再新的控件类型走下一版 mcSpec 提案（附 Issue 描述场景）。
 
 **Q：cfg 键有中文 Section/Key 可以吗？**
 A：可以，`key` 字段按 `"Section:Key"` 原样匹配（中文一致即可）。
