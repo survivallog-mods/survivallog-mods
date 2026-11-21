@@ -77,12 +77,13 @@ function Upsert-SuiteRow {
     } catch {
         $ex = $_.Exception
         $is404 = ($ex -is [Net.WebException]) -and $ex.Response -and ($ex.Response.StatusCode -eq [Net.HttpStatusCode]::NotFound)
-        # 404（桶根尚无 suite.json）与坏结构（JSON 解析错）从空表开始；其余 WebException（网络/5xx）
-        # 上抛——否则一次网络抖动会把共享索引覆盖成单行
+        # catch 只承接 IWR（-ErrorAction Stop）的 WebException：404（桶根尚无 suite.json）从空表开始，
+        # 其余（网络/5xx）上抛——否则一次网络抖动会把共享索引覆盖成单行。坏 JSON 不进 catch
+        # （Continue 下 ConvertFrom-Json 的错非终止，Read-CosJson 返回 $null），由下方检查兜住
         if ($ex -is [Net.WebException] -and -not $is404) { throw }
         $suite = $null
     }
-    if (-not ($suite -is [pscustomobject])) { $suite = $null }   # 坏结构（顶层非对象）从空表开始
+    if (-not ($suite -is [pscustomobject])) { $suite = $null }   # 坏结构兜底（坏 JSON -> $null / 顶层非对象）从空表开始
     $mods = @()
     if ($suite.mods) { $mods = @($suite.mods) }
     $hit = $false
@@ -90,8 +91,8 @@ function Upsert-SuiteRow {
         if ($mods[$i].mod -eq $Row.mod) { $mods[$i] = $Row; $hit = $true; break }
     }
     if (-not $hit) { $mods = @($mods + $Row) }
-    if ($suite) { $suite.mods = $mods; $out = $suite }
-    else { $out = [ordered]@{ mods = $mods } }
+    if ($suite -and $suite.PSObject.Properties['mods']) { $suite.mods = $mods; $out = $suite }
+    else { $out = [ordered]@{ mods = $mods } }   # 顶层缺 mods 时 PS5.1 对不存在属性赋值抛语句级错，从空表重建
     $temp = Join-Path $env:TEMP 'suite.json'
     [IO.File]::WriteAllText($temp, ($out | ConvertTo-Json -Depth 6), (New-Object Text.UTF8Encoding($false)))
     & $coscli -c $cfg cp $temp 'cos://sl/suite.json'
