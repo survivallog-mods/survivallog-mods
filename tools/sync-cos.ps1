@@ -47,10 +47,12 @@ if ($Mod) {
         if ($LASTEXITCODE -ne 0) { throw ('coscli upload versions.json failed: ' + $Mod) }
     }
     # v2.3.0：本 mod 行自动 upsert 桶根 suite.json（本地 update.json 须按字节读 UTF-8——
-    # PS5.1 Get-Content 对无 BOM 文件按 ANSI 解会 mojibake 中文 notes）。失败只警告不炸发版：
-    # 三件已入桶且版本一致，重跑本脚本或 publish-index.ps1 全量重建即可补救
-    $upd = [IO.File]::ReadAllText($UpdateJson, [Text.Encoding]::UTF8) | ConvertFrom-Json
+    # PS5.1 Get-Content 对无 BOM 文件按 ANSI 解会 mojibake 中文 notes）。整段只警告不炸发版：
+    # Continue 下坏 JSON 不抛错只给 $null，不拦会把该 mod 的好行覆盖成全 null 坏行；三件
+    # 已入桶且版本一致，重跑本脚本或 publish-index.ps1 全量重建即可补救
     try {
+        $upd = [IO.File]::ReadAllText($UpdateJson, [Text.Encoding]::UTF8) | ConvertFrom-Json
+        if (-not $upd) { throw 'update.json 解析失败' }
         Upsert-SuiteRow (New-SuiteRow $Mod $upd (Get-ModIdentity $Mod))
     } catch {
         Write-Warning ('suite.json upsert 失败：' + $_.Exception.Message + '；zip/update.json/versions 已上传，重跑本脚本或 publish-index 全量重建补救')
